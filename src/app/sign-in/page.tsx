@@ -1,4 +1,5 @@
 import { SignInCard } from "@/components/sign-in-card"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default async function SignInPage({
   searchParams,
@@ -8,7 +9,10 @@ export default async function SignInPage({
   const { error } = await searchParams
 
   return (
-    <main className="flex min-h-svh items-center justify-center px-6">
+    <main className="relative flex min-h-svh items-center justify-center px-6">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <SignInCard error={error ? describe(error) : null} />
     </main>
   )

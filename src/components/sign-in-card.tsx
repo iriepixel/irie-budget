@@ -19,8 +19,8 @@ export function SignInCard({ error }: { error: string | null }) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Spendings</CardTitle>
-        <CardDescription>Sign in to see the household budget.</CardDescription>
+        <CardTitle>IRIE Budget</CardTitle>
+        <CardDescription>Every pound has a plan. Sign in to see yours.</CardDescription>
       </CardHeader>
       <CardContent>
         <Button

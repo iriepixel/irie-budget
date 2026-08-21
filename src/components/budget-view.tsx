@@ -7,9 +7,16 @@ import { LogOut } from "lucide-react"
 import { HouseholdSummary } from "@/components/household-summary"
 import { LegacyImport } from "@/components/legacy-import"
 import { PersonBudget } from "@/components/person-budget"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { SalaryDialog } from "@/components/salary-dialog"
 import { SpendingDialog } from "@/components/spending-dialog"
 import { Button } from "@/components/ui/button"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import {
   addSpending,
   deleteSpending,
@@ -81,19 +88,48 @@ export function BudgetView({ spendings, salaries, userName }: Props) {
 
   const salaryName = OWNERS.find(({ id }) => id === salaryOwner)?.name ?? ""
 
+  function renderPerson(id: Owner, name: string) {
+    return (
+      <PersonBudget
+        key={id}
+        name={name}
+        salary={salaries[id]}
+        spendings={byOwner[id]}
+        showFood={id === "olia"}
+        onEditSalary={() => setSalaryOwner(id)}
+        onAdd={(kind) => {
+          setTarget({ owner: id, kind, spending: null })
+          setSpendingOpen(true)
+        }}
+        onEdit={(spending) => {
+          setTarget({
+            owner: spending.owner,
+            kind: spending.kind,
+            spending,
+          })
+          setSpendingOpen(true)
+        }}
+        onDelete={handleDelete}
+      />
+    )
+  }
+
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-10 md:py-16">
-      <div className="mb-8 flex items-start justify-between gap-4">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-16">
+      <div className="mb-8 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Spendings</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            IRIE Budget
+          </h1>
           <p className="text-sm text-muted-foreground">
-            What repeats every month, and what only counts for this one.
+            Every pound has a plan.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-muted-foreground sm:inline">
             {userName}
           </span>
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="sm"
@@ -104,7 +140,7 @@ export function BudgetView({ spendings, salaries, userName }: Props) {
             }
           >
             <LogOut />
-            Sign out
+            <span className="hidden sm:inline">Sign out</span>
           </Button>
         </div>
       </div>
@@ -116,31 +152,26 @@ export function BudgetView({ spendings, salaries, userName }: Props) {
           pending ? "opacity-60 transition-opacity" : "transition-opacity"
         }
       >
-        <div className="grid gap-10 md:grid-cols-2 md:gap-8">
-          {OWNERS.map(({ id, name }) => (
-            <PersonBudget
-              key={id}
-              name={name}
-              salary={salaries[id]}
-              spendings={byOwner[id]}
-              showFood={id === "olia"}
-              onEditSalary={() => setSalaryOwner(id)}
-              onAdd={(kind) => {
-                setTarget({ owner: id, kind, spending: null })
-                setSpendingOpen(true)
-              }}
-              onEdit={(spending) => {
-                setTarget({
-                  owner: spending.owner,
-                  kind: spending.kind,
-                  spending,
-                })
-                setSpendingOpen(true)
-              }}
-              onDelete={handleDelete}
-            />
-          ))}
+        {/* Two columns side by side once there is room for them. */}
+        <div className="hidden gap-8 md:grid md:grid-cols-2 [&>*]:min-w-0">
+          {OWNERS.map(({ id, name }) => renderPerson(id, name))}
         </div>
+
+        {/* On a phone the columns become tabs, so neither is squeezed. */}
+        <Tabs defaultValue={OWNERS[0].id} className="gap-6 md:hidden">
+          <TabsList className="grid w-full grid-cols-2">
+            {OWNERS.map(({ id, name }) => (
+              <TabsTrigger key={id} value={id}>
+                {name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {OWNERS.map(({ id, name }) => (
+            <TabsContent key={id} value={id} className="min-w-0">
+              {renderPerson(id, name)}
+            </TabsContent>
+          ))}
+        </Tabs>
 
         <div className="mt-10">
           <HouseholdSummary salaries={salaries} spendings={spendings} />

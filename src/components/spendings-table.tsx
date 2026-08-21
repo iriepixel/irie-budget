@@ -1,7 +1,13 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { ArrowDown, ArrowUp, ChevronsUpDown, Pencil, Trash2 } from "lucide-react"
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
+  Pencil,
+  Trash2,
+} from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -42,9 +48,7 @@ export function SpendingsTable({
       if (column === "title") return factor * a.title.localeCompare(b.title)
       if (column === "category") {
         // Same category keeps the entries in day order rather than at random.
-        return (
-          factor * a.category.localeCompare(b.category) || a.day - b.day
-        )
+        return factor * a.category.localeCompare(b.category) || a.day - b.day
       }
       if (column === "amount") return factor * (a.amount - b.amount)
       return factor * (a.day - b.day)
@@ -72,88 +76,99 @@ export function SpendingsTable({
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[70px] pl-4">
-            <SortButton
-              label="Day"
-              active={column === "day"}
-              direction={direction}
-              onClick={() => toggle("day")}
-            />
-          </TableHead>
-          <TableHead>
-            <SortButton
-              label="Title"
-              active={column === "title"}
-              direction={direction}
-              onClick={() => toggle("title")}
-            />
-          </TableHead>
-          <TableHead>
-            <SortButton
-              label="Category"
-              active={column === "category"}
-              direction={direction}
-              onClick={() => toggle("category")}
-            />
-          </TableHead>
-          <TableHead className="text-right">
-            <SortButton
-              label="Amount"
-              active={column === "amount"}
-              direction={direction}
-              onClick={() => toggle("amount")}
-              className="-mr-2 ml-auto"
-            />
-          </TableHead>
-          <TableHead className="w-[80px] pr-4 text-right">
-            <span className="sr-only">Actions</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sorted.map((spending) => (
-          <TableRow
-            key={spending.id}
-            className="group even:bg-muted/50 hover:bg-muted"
-          >
-            <TableCell className="pl-4 text-muted-foreground tabular-nums">
-              {formatDay(spending.day)}
-            </TableCell>
-            <TableCell className="font-medium">{spending.title}</TableCell>
-            <TableCell>
-              <Badge variant="secondary">{spending.category}</Badge>
-            </TableCell>
-            <TableCell className="text-right tabular-nums">
-              {formatAmount(spending.amount)}
-            </TableCell>
-            <TableCell className="pr-4">
-              <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  onClick={() => onEdit(spending)}
-                  aria-label={`Edit ${spending.title}`}
-                >
-                  <Pencil />
-                </Button>
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-destructive"
-                  onClick={() => onDelete(spending.id)}
-                  aria-label={`Delete ${spending.title}`}
-                >
-                  <Trash2 />
-                </Button>
-              </div>
-            </TableCell>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[64px] pl-4">
+              <SortButton
+                label="Day"
+                active={column === "day"}
+                direction={direction}
+                onClick={() => toggle("day")}
+              />
+            </TableHead>
+            <TableHead>
+              <SortButton
+                label="Title"
+                active={column === "title"}
+                direction={direction}
+                onClick={() => toggle("title")}
+              />
+            </TableHead>
+            {/* Category is the least essential column, so it folds under the
+                title on a phone rather than forcing a sideways scroll. */}
+            <TableHead className="hidden sm:table-cell">
+              <SortButton
+                label="Category"
+                active={column === "category"}
+                direction={direction}
+                onClick={() => toggle("category")}
+              />
+            </TableHead>
+            <TableHead className="text-right">
+              <SortButton
+                label="Amount"
+                active={column === "amount"}
+                direction={direction}
+                onClick={() => toggle("amount")}
+                className="-mr-2 ml-auto"
+              />
+            </TableHead>
+            <TableHead className="w-[80px] pr-4 text-right">
+              <span className="sr-only">Actions</span>
+            </TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((spending) => (
+            <TableRow
+              key={spending.id}
+              className="group even:bg-muted/50 hover:bg-muted"
+            >
+              <TableCell className="pl-4 text-muted-foreground tabular-nums">
+                {formatDay(spending.day)}
+              </TableCell>
+              <TableCell className="font-medium">
+                {spending.title}
+                <span className="mt-1 block sm:hidden">
+                  <Badge variant="secondary">{spending.category}</Badge>
+                </span>
+              </TableCell>
+              <TableCell className="hidden sm:table-cell">
+                <Badge variant="secondary">{spending.category}</Badge>
+              </TableCell>
+              <TableCell className="text-right whitespace-nowrap tabular-nums">
+                {formatAmount(spending.amount)}
+              </TableCell>
+              <TableCell className="pr-4">
+                {/* Touch devices never hover, so the actions stay visible
+                    below sm instead of being unreachable. */}
+                <div className="flex justify-end gap-1 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    onClick={() => onEdit(spending)}
+                    aria-label={`Edit ${spending.title}`}
+                  >
+                    <Pencil />
+                  </Button>
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => onDelete(spending.id)}
+                    aria-label={`Delete ${spending.title}`}
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 
@@ -170,7 +185,11 @@ function SortButton({
   onClick: () => void
   className?: string
 }) {
-  const Icon = !active ? ChevronsUpDown : direction === "asc" ? ArrowUp : ArrowDown
+  const Icon = !active
+    ? ChevronsUpDown
+    : direction === "asc"
+      ? ArrowUp
+      : ArrowDown
 
   return (
     <Button

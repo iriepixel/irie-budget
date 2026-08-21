@@ -109,38 +109,8 @@ export function PersonBudget({
         </CardContent>
         <CardFooter className="justify-between border-t bg-muted/50 py-4">
           <span className="text-sm font-medium">Total recurring</span>
-          <span className="text-lg font-semibold tabular-nums">
+          <span className="text-lg font-semibold whitespace-nowrap tabular-nums">
             {formatAmount(recurringTotal)}
-          </span>
-        </CardFooter>
-      </Card>
-
-      <Card className="gap-0 overflow-hidden py-0">
-        <CardHeader className="border-b py-5">
-          <CardTitle>This month only</CardTitle>
-          <CardDescription>
-            One-off costs · {oneOff.length}{" "}
-            {oneOff.length === 1 ? "entry" : "entries"}
-          </CardDescription>
-          <CardAction>
-            <Button variant="outline" size="sm" onClick={() => onAdd("oneOff")}>
-              <Plus />
-              Add
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="px-0">
-          <SpendingsTable
-            spendings={oneOff}
-            emptyMessage="Nothing extra this month"
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </CardContent>
-        <CardFooter className="justify-between border-t bg-muted/50 py-4">
-          <span className="text-sm font-medium">Total this month only</span>
-          <span className="text-lg font-semibold tabular-nums">
-            {formatAmount(oneOffTotal)}
           </span>
         </CardFooter>
       </Card>
@@ -170,12 +140,42 @@ export function PersonBudget({
           </CardContent>
           <CardFooter className="justify-between border-t bg-muted/50 py-4">
             <span className="text-sm font-medium">Total food</span>
-            <span className="text-lg font-semibold tabular-nums">
+            <span className="text-lg font-semibold whitespace-nowrap tabular-nums">
               {formatAmount(foodTotal)}
             </span>
           </CardFooter>
         </Card>
       ) : null}
+
+      <Card className="gap-0 overflow-hidden py-0">
+        <CardHeader className="border-b py-5">
+          <CardTitle>This month only</CardTitle>
+          <CardDescription>
+            One-off costs · {oneOff.length}{" "}
+            {oneOff.length === 1 ? "entry" : "entries"}
+          </CardDescription>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={() => onAdd("oneOff")}>
+              <Plus />
+              Add
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="px-0">
+          <SpendingsTable
+            spendings={oneOff}
+            emptyMessage="Nothing extra this month"
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </CardContent>
+        <CardFooter className="justify-between border-t bg-muted/50 py-4">
+          <span className="text-sm font-medium">Total this month only</span>
+          <span className="text-lg font-semibold whitespace-nowrap tabular-nums">
+            {formatAmount(oneOffTotal)}
+          </span>
+        </CardFooter>
+      </Card>
 
       <Card>
         <CardContent className="space-y-3">
@@ -187,16 +187,16 @@ export function PersonBudget({
             <span className="text-muted-foreground">Recurring</span>
             <span className="tabular-nums">−{formatAmount(recurringTotal)}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">This month only</span>
-            <span className="tabular-nums">−{formatAmount(oneOffTotal)}</span>
-          </div>
           {showFood ? (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Food</span>
               <span className="tabular-nums">−{formatAmount(foodTotal)}</span>
             </div>
           ) : null}
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">This month only</span>
+            <span className="tabular-nums">−{formatAmount(oneOffTotal)}</span>
+          </div>
           <div className="flex items-center justify-between border-t pt-3 text-sm">
             <span className="font-medium">Total spendings</span>
             <span className="font-medium tabular-nums">

@@ -58,24 +58,27 @@ export function HouseholdSummary({ salaries, spendings }: Props) {
         />
       </CardContent>
 
-      <CardFooter className="grid gap-3 border-t pt-6 sm:grid-cols-2">
+      <CardFooter className="grid gap-6 border-t pt-6 sm:grid-cols-2 sm:gap-0 sm:divide-x">
         {OWNERS.map(({ id, name }) => {
           const spent = sumAmounts(spendings.filter((s) => s.owner === id))
           const left = salaries[id] - spent
 
           return (
-            <div key={id} className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {name} {left < 0 ? "over by" : "has left"}
-              </span>
-              <span
+            <div
+              key={id}
+              className="space-y-1 sm:px-6 sm:first:pl-0 sm:last:pr-0"
+            >
+              <p className="text-sm text-muted-foreground">
+                {name} {left < 0 ? "is over by" : "has left"}
+              </p>
+              <p
                 className={cn(
-                  "font-medium tabular-nums",
+                  "text-lg font-semibold tabular-nums",
                   left < 0 && "text-destructive"
                 )}
               >
                 {formatAmount(Math.abs(left))}
-              </span>
+              </p>
             </div>
           )
         })}
@@ -98,7 +101,12 @@ function Stat({
   return (
     <div className="space-y-1">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className={cn("text-3xl font-semibold tabular-nums", className)}>
+      <p
+        className={cn(
+          "text-2xl font-semibold tabular-nums sm:text-3xl",
+          className
+        )}
+      >
         {value}
       </p>
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
