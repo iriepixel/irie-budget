@@ -1,0 +1,216 @@
+"use client"
+
+import { useState } from "react"
+
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  CATEGORIES,
+  currentDay,
+  DAYS,
+  formatDay,
+  type Category,
+  type Spending,
+  type SpendingKind,
+} from "@/lib/spendings"
+
+type Values = Omit<Spending, "id" | "kind" | "owner">
+
+const KIND_LABELS: Record<SpendingKind, string> = {
+  recurring: "recurring spending",
+  oneOff: "one-off spending",
+  food: "food spending",
+}
+
+const KIND_DESCRIPTIONS: Record<SpendingKind, (name: string) => string> = {
+  recurring: (name) => `A cost of ${name}'s that repeats every month.`,
+  oneOff: (name) =>
+    `A one-off cost of ${name}'s, counted towards this month only.`,
+  food: (name) => `A food cost, counted towards ${name}'s food budget.`,
+}
+
+type Props = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  /** Present when editing an existing spending. */
+  spending: Spending | null
+  /** Which list the spending belongs to, shown in the dialog copy. */
+  kind: SpendingKind
+  /** Whose spending it is. */
+  name: string
+  onSubmit: (values: Values) => void
+}
+
+export function SpendingDialog({
+  open,
+  onOpenChange,
+  spending,
+  kind,
+  name,
+  onSubmit,
+}: Props) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        {/* The content unmounts on close, so the form resets on every open. */}
+        <SpendingForm
+          spending={spending}
+          kind={kind}
+          name={name}
+          onSubmit={(values) => {
+            onSubmit(values)
+            onOpenChange(false)
+          }}
+          onCancel={() => onOpenChange(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function SpendingForm({
+  spending,
+  kind,
+  name,
+  onSubmit,
+  onCancel,
+}: {
+  spending: Spending | null
+  kind: SpendingKind
+  name: string
+  onSubmit: (values: Values) => void
+  onCancel: () => void
+}) {
+  const [title, setTitle] = useState(spending?.title ?? "")
+  const [amount, setAmount] = useState(
+    spending ? String(spending.amount) : ""
+  )
+  const [day, setDay] = useState(String(spending?.day ?? currentDay()))
+  const [category, setCategory] = useState<Category>(
+    spending?.category ?? (kind === "food" ? "Food" : "Other")
+  )
+  const [error, setError] = useState<string | null>(null)
+
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+
+    const trimmed = title.trim()
+    const parsedAmount = Number(amount)
+
+    if (!trimmed) return setError("Give the spending a title.")
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0)
+      return setError("Amount has to be a number greater than 0.")
+
+    onSubmit({
+      title: trimmed,
+      amount: Math.round(parsedAmount * 100) / 100,
+      day: Number(day),
+      category,
+    })
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="grid gap-6">
+      <DialogHeader>
+        <DialogTitle>
+          {spending ? "Edit" : "Add"} {KIND_LABELS[kind]}
+        </DialogTitle>
+        <DialogDescription>
+          {KIND_DESCRIPTIONS[kind](name)}
+        </DialogDescription>
+      </DialogHeader>
+
+      <div className="grid gap-4">
+        <div className="grid gap-3">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Groceries"
+            autoFocus
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-3">
+            <Label htmlFor="amount">Amount</Label>
+            <Input
+              id="amount"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+            />
+          </div>
+          <div className="grid gap-3">
+            <Label htmlFor="day">Day of month</Label>
+            <Select value={day} onValueChange={setDay}>
+              <SelectTrigger id="day" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DAYS.map((option) => (
+                  <SelectItem key={option} value={String(option)}>
+                    {formatDay(option)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="grid gap-3">
+          <Label htmlFor="category">Category</Label>
+          <Select
+            value={category}
+            onValueChange={(value) => setCategory(value as Category)}
+          >
+            <SelectTrigger id="category" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {error ? (
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
+
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">{spending ? "Save changes" : "Add spending"}</Button>
+      </DialogFooter>
+    </form>
+  )
+}
