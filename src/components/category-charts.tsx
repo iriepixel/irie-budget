@@ -85,7 +85,7 @@ export function CategoryCharts({ spendings }: { spendings: Spending[] }) {
           second row leaves the extra tabs outside its background. */}
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="amounts">Amounts</TabsTrigger>
-        <TabsTrigger value="kind">Kind</TabsTrigger>
+        <TabsTrigger value="kind">Type</TabsTrigger>
         <TabsTrigger value="person">Person</TabsTrigger>
         <TabsTrigger value="day">Day</TabsTrigger>
       </TabsList>

@@ -47,12 +47,9 @@ export function PotView({ pot }: { pot: Pot }) {
 
           <div className="space-y-2 text-center">
             <p className="text-sm text-muted-foreground">Money saved</p>
-            <p
-              className={cn(
-                "text-6xl font-semibold tracking-tight whitespace-nowrap tabular-nums sm:text-7xl",
-                tone
-              )}
-            >
+            {/* The tone lives on the percentage; painting the whole amount
+                destructive-red made a fresh, distant goal read as an error. */}
+            <p className="text-6xl font-semibold tracking-tight whitespace-nowrap tabular-nums sm:text-7xl">
               {formatAmount(shown.saved)}
             </p>
 

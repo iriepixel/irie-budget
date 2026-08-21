@@ -69,9 +69,16 @@ export function PersonBudget({
       <Card>
         <CardHeader>
           <CardDescription>Monthly salary</CardDescription>
-          <CardTitle className="text-3xl whitespace-nowrap tabular-nums sm:text-4xl">
-            {formatAmount(salary)}
-          </CardTitle>
+          {/* £0.00 reads as "salary is zero"; an unset salary is different. */}
+          {salary > 0 ? (
+            <CardTitle className="text-3xl whitespace-nowrap tabular-nums sm:text-4xl">
+              {formatAmount(salary)}
+            </CardTitle>
+          ) : (
+            <CardTitle className="text-3xl text-muted-foreground sm:text-4xl">
+              Not set
+            </CardTitle>
+          )}
           <CardAction>
             <Button variant="outline" size="sm" onClick={onEditSalary}>
               {salary ? <Pencil /> : <Plus />}
@@ -203,21 +210,27 @@ export function PersonBudget({
               {formatAmount(monthTotal)}
             </span>
           </div>
-          <div className="flex items-center justify-between border-t pt-3">
-            <span className="font-medium">
-              {remaining < 0 ? "Over budget by" : "Left to spend"}
-            </span>
-            <span
-              className={cn(
-                "text-2xl font-semibold tabular-nums",
-                remaining < 0
-                  ? "text-destructive"
-                  : "text-emerald-600 dark:text-emerald-500"
-              )}
-            >
-              {formatAmount(Math.abs(remaining))}
-            </span>
-          </div>
+          {salary > 0 ? (
+            <div className="flex items-center justify-between border-t pt-3">
+              <span className="font-medium">
+                {remaining < 0 ? "Over budget by" : "Left to spend"}
+              </span>
+              <span
+                className={cn(
+                  "text-2xl font-semibold tabular-nums",
+                  remaining < 0
+                    ? "text-destructive"
+                    : "text-emerald-600 dark:text-emerald-500"
+                )}
+              >
+                {formatAmount(Math.abs(remaining))}
+              </span>
+            </div>
+          ) : (
+            <p className="border-t pt-3 text-sm text-muted-foreground">
+              Add {name}&apos;s salary to see what is left to spend.
+            </p>
+          )}
         </CardContent>
       </Card>
     </section>

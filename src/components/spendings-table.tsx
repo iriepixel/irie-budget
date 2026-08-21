@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import {
   ArrowDown,
   ArrowUp,
+  ChevronRight,
   ChevronsUpDown,
   Pencil,
   Trash2,
@@ -129,6 +130,7 @@ export function SpendingsTable({
           <Button
             variant="ghost"
             size="icon-sm"
+            className="relative after:absolute after:-inset-2"
             aria-label={direction === "asc" ? "Sorted ascending" : "Sorted descending"}
             onClick={() =>
               setDirection((current) => (current === "asc" ? "desc" : "asc"))
@@ -144,8 +146,10 @@ export function SpendingsTable({
               <button
                 type="button"
                 onClick={() => onEdit(spending)}
-                className="flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors active:bg-muted"
+                aria-label={`Edit ${spending.title}`}
+                className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors active:bg-muted"
               >
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
                 <span className="flex w-full items-baseline justify-between gap-3">
                   <span className="flex min-w-0 items-baseline gap-2">
                     <span className="w-6 shrink-0 text-xs text-muted-foreground tabular-nums">
@@ -159,12 +163,19 @@ export function SpendingsTable({
                     {formatAmount(spending.amount)}
                   </span>
                 </span>
-                <span className="flex items-center pl-8 text-xs text-muted-foreground">
-                  <CategoryBadge
-                    category={spending.category}
-                    className="px-1.5 py-0 text-[11px]"
-                  />
+                  <span className="flex items-center pl-8 text-xs text-muted-foreground">
+                    <CategoryBadge
+                      category={spending.category}
+                      className="px-1.5 py-0 text-[11px]"
+                    />
+                  </span>
                 </span>
+                {/* The mark that says a row opens; without it tap-to-edit
+                    is invisible, and delete lives behind it. */}
+                <ChevronRight
+                  aria-hidden
+                  className="size-4 shrink-0 text-muted-foreground"
+                />
               </button>
             </li>
           ))}

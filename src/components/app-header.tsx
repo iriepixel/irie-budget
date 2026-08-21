@@ -4,12 +4,19 @@ import { useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChartPie, Download, House, LogOut, PiggyBank } from "lucide-react"
+import { toast } from "sonner"
 
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { signOut } from "@/lib/auth-client"
+import { cn } from "@/lib/utils"
 
 /** Shown until the picture loads, or when the account has none. */
 function initials(name: string) {
@@ -28,6 +35,22 @@ const NAV = [
   { href: "/categories", label: "Spending by category", Icon: ChartPie },
   { href: "/pot", label: "Savings pot", Icon: PiggyBank },
 ]
+
+/** An icon-only header needs its labels back somewhere. */
+function Labelled({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
+}
 
 export function AppHeader({
   user,
@@ -55,44 +78,60 @@ export function AppHeader({
         <p className="text-sm text-muted-foreground">Every pound has a plan.</p>
       </div>
 
-      <div className="flex items-center gap-1">
-        <Avatar className="mr-2 size-8">
-          <AvatarImage src={user.image ?? undefined} alt={user.name} />
-          <AvatarFallback>{initials(user.name)}</AvatarFallback>
-        </Avatar>
-        {NAV.map(({ href, label, Icon }) => (
-          <Button
-            key={href}
-            variant="ghost"
-            size="icon"
-            asChild
-            // Marks where you are, now that three pages share one header.
-            className={cn(pathname === href && "bg-muted text-foreground")}
-          >
-            <Link href={href} prefetch aria-label={label}>
-              <Icon />
-            </Link>
-          </Button>
-        ))}
-        <ThemeToggle />
-        <Button variant="ghost" size="icon" asChild>
-          <a href="/api/backup" download aria-label="Download a backup">
-            <Download />
-          </a>
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Sign out"
-          onClick={() =>
-            signOut({
-              fetchOptions: { onSuccess: () => router.push("/sign-in") },
-            })
-          }
-        >
-          <LogOut />
-        </Button>
-      </div>
+      <TooltipProvider delayDuration={300}>
+        <div className="flex items-center gap-1">
+          <Avatar className="mr-2 size-8">
+            <AvatarImage src={user.image ?? undefined} alt={user.name} />
+            <AvatarFallback>{initials(user.name)}</AvatarFallback>
+          </Avatar>
+          {NAV.map(({ href, label, Icon }) => (
+            <Labelled key={href} label={label}>
+              <Button
+                variant="ghost"
+                size="icon"
+                asChild
+                // Marks where you are, now that three pages share one header.
+                className={cn(pathname === href && "bg-muted text-foreground")}
+              >
+                <Link href={href} prefetch aria-label={label}>
+                  <Icon />
+                </Link>
+              </Button>
+            </Labelled>
+          ))}
+          <Labelled label="Light or dark theme">
+            <span>
+              <ThemeToggle />
+            </span>
+          </Labelled>
+          <Labelled label="Download a backup">
+            <Button variant="ghost" size="icon" asChild>
+              <a
+                href="/api/backup"
+                download
+                aria-label="Download a backup"
+                onClick={() => toast("Backup downloaded")}
+              >
+                <Download />
+              </a>
+            </Button>
+          </Labelled>
+          <Labelled label="Sign out">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Sign out"
+              onClick={() =>
+                signOut({
+                  fetchOptions: { onSuccess: () => router.push("/sign-in") },
+                })
+              }
+            >
+              <LogOut />
+            </Button>
+          </Labelled>
+        </div>
+      </TooltipProvider>
     </div>
   )
 }
