@@ -34,7 +34,13 @@ export function SignInCard({ error }: { error: string | null }) {
               {
                 onError: ({ error }) => {
                   setPending(false)
-                  setFailure(error.message || "Sign in failed. Try again.")
+                  // Status and code matter here: the server sometimes fails
+                  // with no message, and "try again" hides why.
+                  setFailure(
+                    [error.message, error.code, error.status]
+                      .filter(Boolean)
+                      .join(" · ") || "Sign in failed. Try again."
+                  )
                 },
               }
             )

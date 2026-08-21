@@ -7,7 +7,23 @@ import { isAllowed } from "@/lib/allowlist"
 import { db } from "@/lib/db"
 import { account, session, user, verification } from "@/lib/db/auth-schema"
 
+/**
+ * Hosts know their own deployment URL, so prefer it over BETTER_AUTH_URL in
+ * production: a value copied from .env.local still says localhost, which
+ * makes better-auth reject the request as a bad origin.
+ */
+function resolveBaseURL() {
+  // Netlify exposes the site's primary URL as URL.
+  if (process.env.URL?.startsWith("https://")) return process.env.URL
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  return process.env.BETTER_AUTH_URL
+}
+
+const baseURL = resolveBaseURL()
+
 export const auth = betterAuth({
+  baseURL,
+  trustedOrigins: baseURL ? [baseURL] : [],
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: { user, session, account, verification },
