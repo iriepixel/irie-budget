@@ -1,10 +1,11 @@
 "use client"
 
-import { useMemo, useState, useTransition } from "react"
+import { useMemo, useOptimistic, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { LogOut, PiggyBank } from "lucide-react"
 
+import { CategoryBreakdown } from "@/components/category-breakdown"
 import { HouseholdSummary } from "@/components/household-summary"
 import { LegacyImport } from "@/components/legacy-import"
 import { PersonBudget } from "@/components/person-budget"
@@ -50,6 +51,25 @@ function initials(name: string) {
   return letters.toUpperCase() || "?"
 }
 
+/** A write that has been sent but not yet confirmed by the server. */
+type PendingWrite =
+  | { type: "add"; spending: Spending }
+  | { type: "update"; spending: Spending }
+  | { type: "delete"; id: string }
+
+function applyWrite(current: Spending[], write: PendingWrite): Spending[] {
+  switch (write.type) {
+    case "add":
+      return [...current, write.spending]
+    case "update":
+      return current.map((s) =>
+        s.id === write.spending.id ? write.spending : s
+      )
+    case "delete":
+      return current.filter((s) => s.id !== write.id)
+  }
+}
+
 /** Which person a dialog is currently acting on. */
 type Target = { owner: Owner; kind: SpendingKind; spending: Spending | null }
 
@@ -67,15 +87,28 @@ export function BudgetView({ spendings, salaries, user }: Props) {
   })
   const [spendingOpen, setSpendingOpen] = useState(false)
   const [salaryOwner, setSalaryOwner] = useState<Owner | null>(null)
-  const [pending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const router = useRouter()
+
+  // Show the result immediately; the server action revalidates behind it.
+  const [shownSpendings, addWrite] = useOptimistic(spendings, applyWrite)
+  const [shownSalaries, setShownSalary] = useOptimistic(
+    salaries,
+    (current: Salaries, next: { owner: Owner; amount: number }) => ({
+      ...current,
+      [next.owner]: next.amount,
+    })
+  )
 
   const byOwner = useMemo(
     () =>
       Object.fromEntries(
-        OWNERS.map(({ id }) => [id, spendings.filter((s) => s.owner === id)])
+        OWNERS.map(({ id }) => [
+          id,
+          shownSpendings.filter((s) => s.owner === id),
+        ])
       ) as Record<Owner, Spending[]>,
-    [spendings]
+    [shownSpendings]
   )
 
   function handleSpendingSubmit(values: Omit<Spending, "id" | "kind" | "owner">) {
@@ -83,8 +116,17 @@ export function BudgetView({ spendings, salaries, user }: Props) {
 
     startTransition(async () => {
       if (spending) {
+        addWrite({
+          type: "update",
+          spending: { ...values, id: spending.id, kind, owner },
+        })
         await updateSpending(spending.id, { ...values, kind, owner })
       } else {
+        // A throwaway id, replaced when the server data arrives.
+        addWrite({
+          type: "add",
+          spending: { ...values, id: crypto.randomUUID(), kind, owner },
+        })
         await addSpending({ ...values, kind, owner })
       }
     })
@@ -92,6 +134,7 @@ export function BudgetView({ spendings, salaries, user }: Props) {
 
   function handleDelete(id: string) {
     startTransition(async () => {
+      addWrite({ type: "delete", id })
       await deleteSpending(id)
     })
   }
@@ -100,6 +143,7 @@ export function BudgetView({ spendings, salaries, user }: Props) {
     if (!salaryOwner) return
 
     startTransition(async () => {
+      setShownSalary({ owner: salaryOwner, amount })
       await setSalary({ owner: salaryOwner, amount })
     })
   }
@@ -111,7 +155,7 @@ export function BudgetView({ spendings, salaries, user }: Props) {
       <PersonBudget
         key={id}
         name={name}
-        salary={salaries[id]}
+        salary={shownSalaries[id]}
         spendings={byOwner[id]}
         showFood={id === "olia"}
         onEditSalary={() => setSalaryOwner(id)}
@@ -171,11 +215,7 @@ export function BudgetView({ spendings, salaries, user }: Props) {
 
       <LegacyImport hasData={spendings.length > 0} />
 
-      <div
-        className={
-          pending ? "opacity-60 transition-opacity" : "transition-opacity"
-        }
-      >
+      <div>
         {/* Two columns side by side once there is room for them. */}
         <div className="hidden gap-8 md:grid md:grid-cols-2 [&>*]:min-w-0">
           {OWNERS.map(({ id, name }) => renderPerson(id, name))}
@@ -197,8 +237,12 @@ export function BudgetView({ spendings, salaries, user }: Props) {
           ))}
         </Tabs>
 
-        <div className="mt-10">
-          <HouseholdSummary salaries={salaries} spendings={spendings} />
+        <div className="mt-10 space-y-6">
+          <HouseholdSummary
+            salaries={shownSalaries}
+            spendings={shownSpendings}
+          />
+          <CategoryBreakdown spendings={shownSpendings} />
         </div>
       </div>
 
@@ -208,7 +252,7 @@ export function BudgetView({ spendings, salaries, user }: Props) {
           if (!open) setSalaryOwner(null)
         }}
         name={salaryName}
-        salary={salaryOwner ? salaries[salaryOwner] : 0}
+        salary={salaryOwner ? shownSalaries[salaryOwner] : 0}
         onSubmit={handleSalarySubmit}
       />
 

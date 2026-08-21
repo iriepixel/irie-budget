@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useOptimistic, useState, useTransition } from "react"
 import Link from "next/link"
 import { ArrowLeft, Pencil, PiggyBank } from "lucide-react"
 
@@ -13,7 +13,8 @@ import { formatAmount } from "@/lib/spendings"
 
 export function PotView({ saved }: { saved: number }) {
   const [open, setOpen] = useState(false)
-  const [pending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
+  const [shownSaved, setShownSaved] = useOptimistic(saved)
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 md:py-16">
@@ -28,13 +29,7 @@ export function PotView({ saved }: { saved: number }) {
       </div>
 
       <Card>
-        <CardContent
-          className={
-            pending
-              ? "flex flex-col items-center gap-6 py-12 opacity-60 transition-opacity"
-              : "flex flex-col items-center gap-6 py-12 transition-opacity"
-          }
-        >
+        <CardContent className="flex flex-col items-center gap-6 py-12">
           <div className="flex size-14 items-center justify-center rounded-full bg-muted">
             <PiggyBank className="size-7 text-muted-foreground" />
           </div>
@@ -42,7 +37,7 @@ export function PotView({ saved }: { saved: number }) {
           <div className="space-y-2 text-center">
             <p className="text-sm text-muted-foreground">Money saved</p>
             <p className="text-5xl font-semibold tracking-tight tabular-nums">
-              {formatAmount(saved)}
+              {formatAmount(shownSaved)}
             </p>
           </div>
 
@@ -56,8 +51,13 @@ export function PotView({ saved }: { saved: number }) {
       <PotDialog
         open={open}
         onOpenChange={setOpen}
-        saved={saved}
-        onSubmit={(amount) => startTransition(async () => setPot({ amount }))}
+        saved={shownSaved}
+        onSubmit={(amount) =>
+          startTransition(async () => {
+            setShownSaved(amount)
+            await setPot({ amount })
+          })
+        }
       />
     </main>
   )
