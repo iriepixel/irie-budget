@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Netlify auto-installs @netlify/plugin-nextjs (the OpenNext adapter).
+# It must be v5.15.11 or newer for the proxy.ts convention Next 16 uses;
+# auto-install always takes the latest, so no pin is needed here.
