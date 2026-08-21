@@ -1,6 +1,8 @@
 import "server-only"
 
-import { db, salaries, spendings } from "@/lib/db"
+import { eq } from "drizzle-orm"
+
+import { db, pot, salaries, spendings } from "@/lib/db"
 import {
   OWNER_IDS,
   type Owner,
@@ -48,4 +50,12 @@ export async function getBudget(): Promise<{
     })),
     salaries: amounts,
   }
+}
+
+/** The savings pot is a single running total, stored under one key. */
+export const POT_ID = "household"
+
+export async function getPot(): Promise<number> {
+  const [row] = await db.select().from(pot).where(eq(pot.id, POT_ID))
+  return row ? toPounds(row.amountPence) : 0
 }

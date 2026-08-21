@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-import { db, salaries, spendings } from "@/lib/db"
-import { toPence } from "@/lib/queries"
+import { db, pot, salaries, spendings } from "@/lib/db"
+import { POT_ID, toPence } from "@/lib/queries"
 import { requireUser } from "@/lib/session"
 import { CATEGORIES, OWNER_IDS, SPENDING_KINDS } from "@/lib/spendings"
 
@@ -22,6 +22,23 @@ const salaryInput = z.object({
   owner: z.enum(OWNER_IDS),
   amount: z.number().min(0).max(1_000_000),
 })
+
+const potInput = z.object({
+  amount: z.number().min(0).max(100_000_000),
+})
+
+export async function setPot(input: unknown) {
+  await requireUser()
+  const { amount } = potInput.parse(input)
+  const amountPence = toPence(amount)
+
+  await db
+    .insert(pot)
+    .values({ id: POT_ID, amountPence })
+    .onConflictDoUpdate({ target: pot.id, set: { amountPence } })
+
+  revalidatePath("/pot")
+}
 
 export async function addSpending(input: unknown) {
   await requireUser()

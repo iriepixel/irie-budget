@@ -35,5 +35,14 @@ export const salaries = pgTable("salaries", {
   amountPence: integer("amount_pence").notNull(),
 })
 
+/**
+ * The savings pot: a single running total, so one row keyed by a constant.
+ */
+export const pot = pgTable("pot", {
+  id: text("id").primaryKey(),
+  amountPence: integer("amount_pence").notNull(),
+})
+
 export type SpendingRow = typeof spendings.$inferSelect
 export type SalaryRow = typeof salaries.$inferSelect
+export type PotRow = typeof pot.$inferSelect

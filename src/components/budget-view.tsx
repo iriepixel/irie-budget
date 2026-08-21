@@ -1,8 +1,9 @@
 "use client"
 
 import { useMemo, useState, useTransition } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { LogOut, PiggyBank } from "lucide-react"
 
 import { HouseholdSummary } from "@/components/household-summary"
 import { LegacyImport } from "@/components/legacy-import"
@@ -10,6 +11,11 @@ import { PersonBudget } from "@/components/person-budget"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { SalaryDialog } from "@/components/salary-dialog"
 import { SpendingDialog } from "@/components/spending-dialog"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Tabs,
@@ -32,16 +38,28 @@ import {
   type SpendingKind,
 } from "@/lib/spendings"
 
+/** Shown until the picture loads, or when the account has none. */
+function initials(name: string) {
+  const letters = name
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+
+  return letters.toUpperCase() || "?"
+}
+
 /** Which person a dialog is currently acting on. */
 type Target = { owner: Owner; kind: SpendingKind; spending: Spending | null }
 
 type Props = {
   spendings: Spending[]
   salaries: Salaries
-  userName: string
+  user: { name: string; image: string | null }
 }
 
-export function BudgetView({ spendings, salaries, userName }: Props) {
+export function BudgetView({ spendings, salaries, user }: Props) {
   const [target, setTarget] = useState<Target>({
     owner: "jev",
     kind: "recurring",
@@ -126,13 +144,20 @@ export function BudgetView({ spendings, salaries, userName }: Props) {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="hidden text-sm text-muted-foreground sm:inline">
-            {userName}
-          </span>
+          <Avatar className="size-8">
+            <AvatarImage src={user.image ?? undefined} alt={user.name} />
+            <AvatarFallback>{initials(user.name)}</AvatarFallback>
+          </Avatar>
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/pot" aria-label="Savings pot">
+              <PiggyBank />
+            </Link>
+          </Button>
           <ThemeToggle />
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
+            aria-label="Sign out"
             onClick={() =>
               signOut({
                 fetchOptions: { onSuccess: () => router.push("/sign-in") },
@@ -140,7 +165,6 @@ export function BudgetView({ spendings, salaries, userName }: Props) {
             }
           >
             <LogOut />
-            <span className="hidden sm:inline">Sign out</span>
           </Button>
         </div>
       </div>

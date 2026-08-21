@@ -8,6 +8,13 @@
       "when": 1787319072834,
       "tag": "0000_handy_stick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787324910775,
+      "tag": "0001_overjoyed_micromacro",
+      "breakpoints": true
     }
   ]
 }

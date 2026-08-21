@@ -10,7 +10,10 @@ export default async function Home() {
     <BudgetView
       spendings={spendings}
       salaries={salaries}
-      userName={user.name || user.email}
+      user={{
+        name: user.name || user.email,
+        image: user.image ?? null,
+      }}
     />
   )
 }
