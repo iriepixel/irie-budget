@@ -47,9 +47,15 @@ export async function getBudget(): Promise<{
 /** The savings pot is a single running total, stored under one key. */
 export const POT_ID = "household"
 
-export async function getPot(): Promise<number> {
+export type Pot = { saved: number; goal: number }
+
+export async function getPot(): Promise<Pot> {
   const [row] = await db.select().from(pot).where(eq(pot.id, POT_ID))
-  return row ? toPounds(row.amountPence) : 0
+
+  return {
+    saved: row ? toPounds(row.amountPence) : 0,
+    goal: row ? toPounds(row.goalPence) : 0,
+  }
 }
 
 export { toPence, toPounds }

@@ -2,7 +2,7 @@ import { PotView } from "@/components/pot-view"
 import { getPot } from "@/lib/queries"
 
 export default async function PotPage() {
-  const saved = await getPot()
+  const pot = await getPot()
 
-  return <PotView saved={saved} />
+  return <PotView pot={pot} />
 }

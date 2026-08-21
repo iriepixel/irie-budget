@@ -3,18 +3,22 @@
 import { useOptimistic, useState, useTransition } from "react"
 import { Pencil, PiggyBank } from "lucide-react"
 
-import { report } from "@/lib/report"
-
 import { PotDialog } from "@/components/pot-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { setPot } from "@/app/actions"
+import { potProgress } from "@/lib/pot-progress"
+import { report } from "@/lib/report"
 import { formatAmount } from "@/lib/spendings"
+import { cn } from "@/lib/utils"
+import type { Pot } from "@/lib/queries"
 
-export function PotView({ saved }: { saved: number }) {
+export function PotView({ pot }: { pot: Pot }) {
   const [open, setOpen] = useState(false)
   const [, startTransition] = useTransition()
-  const [shownSaved, setShownSaved] = useOptimistic(saved)
+  const [shown, setShown] = useOptimistic(pot)
+
+  const { percent, tone } = potProgress(shown.saved, shown.goal)
 
   return (
     <>
@@ -26,9 +30,27 @@ export function PotView({ saved }: { saved: number }) {
 
           <div className="space-y-2 text-center">
             <p className="text-sm text-muted-foreground">Money saved</p>
-            <p className="text-5xl font-semibold tracking-tight tabular-nums">
-              {formatAmount(shownSaved)}
+            <p
+              className={cn(
+                "text-6xl font-semibold tracking-tight whitespace-nowrap tabular-nums sm:text-7xl",
+                tone
+              )}
+            >
+              {formatAmount(shown.saved)}
             </p>
+
+            {percent === null ? (
+              <p className="text-sm text-muted-foreground">
+                No goal set yet
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                <span className={cn("font-semibold tabular-nums", tone)}>
+                  {percent}%
+                </span>{" "}
+                of {formatAmount(shown.goal)}
+              </p>
+            )}
           </div>
 
           <Button variant="outline" onClick={() => setOpen(true)}>
@@ -41,11 +63,14 @@ export function PotView({ saved }: { saved: number }) {
       <PotDialog
         open={open}
         onOpenChange={setOpen}
-        saved={shownSaved}
-        onSubmit={(amount) =>
+        pot={shown}
+        onSubmit={(next) =>
           startTransition(async () => {
-            setShownSaved(amount)
-            await report(() => setPot({ amount }), "Could not save the pot")
+            setShown(next)
+            await report(
+              () => setPot({ amount: next.saved, goal: next.goal }),
+              "Could not save the pot"
+            )
           })
         }
       />

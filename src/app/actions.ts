@@ -25,17 +25,19 @@ const salaryInput = z.object({
 
 const potInput = z.object({
   amount: z.number().min(0).max(100_000_000),
+  goal: z.number().min(0).max(100_000_000),
 })
 
 export async function setPot(input: unknown) {
   await requireUser()
-  const { amount } = potInput.parse(input)
+  const { amount, goal } = potInput.parse(input)
   const amountPence = toPence(amount)
+  const goalPence = toPence(goal)
 
   await db
     .insert(pot)
-    .values({ id: POT_ID, amountPence })
-    .onConflictDoUpdate({ target: pot.id, set: { amountPence } })
+    .values({ id: POT_ID, amountPence, goalPence })
+    .onConflictDoUpdate({ target: pot.id, set: { amountPence, goalPence } })
 
   revalidatePath("/pot")
 }

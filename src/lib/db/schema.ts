@@ -41,6 +41,8 @@ export const salaries = pgTable("salaries", {
 export const pot = pgTable("pot", {
   id: text("id").primaryKey(),
   amountPence: integer("amount_pence").notNull(),
+  /** What the pot is aiming for. Zero means no goal set. */
+  goalPence: integer("goal_pence").notNull().default(0),
 })
 
 export type SpendingRow = typeof spendings.$inferSelect

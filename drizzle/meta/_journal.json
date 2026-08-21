@@ -15,6 +15,13 @@
       "when": 1787324910775,
       "tag": "0001_overjoyed_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787331492498,
+      "tag": "0002_round_microbe",
+      "breakpoints": true
     }
   ]
 }
