@@ -21,9 +21,29 @@ function resolveBaseURL() {
 
 const baseURL = resolveBaseURL()
 
+/**
+ * Every origin the app is legitimately served from. Setting this explicitly
+ * replaces better-auth's default, so anything missing here is rejected with
+ * INVALID_ORIGIN — deploy previews and unique deploy URLs included.
+ */
+function resolveTrustedOrigins() {
+  const origins = [
+    baseURL,
+    process.env.URL, // Netlify production
+    process.env.DEPLOY_PRIME_URL, // Netlify branch deploys and previews
+    process.env.DEPLOY_URL, // Netlify per-deploy URL
+  ]
+
+  if (process.env.NODE_ENV !== "production") {
+    origins.push("http://localhost:3000", "http://localhost:8888")
+  }
+
+  return [...new Set(origins.filter((origin): origin is string => !!origin))]
+}
+
 export const auth = betterAuth({
   baseURL,
-  trustedOrigins: baseURL ? [baseURL] : [],
+  trustedOrigins: resolveTrustedOrigins(),
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: { user, session, account, verification },
