@@ -199,6 +199,10 @@ export function PersonBudget({
       </Card>
 
       <Card>
+        <CardHeader>
+          <CardTitle>Summary</CardTitle>
+          <CardDescription>Where {name}&apos;s salary goes</CardDescription>
+        </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Salary</span>
