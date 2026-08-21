@@ -53,3 +53,18 @@ export async function getPot(): Promise<number> {
 }
 
 export { toPence, toPounds }
+
+/** Only the spendings, for pages that do not need salaries. */
+export async function getSpendings(): Promise<Spending[]> {
+  const rows = await db.select().from(spendings)
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    amount: toPounds(row.amountPence),
+    day: row.day,
+    category: row.category as Spending["category"],
+    kind: row.kind as Spending["kind"],
+    owner: row.owner as Owner,
+  }))
+}

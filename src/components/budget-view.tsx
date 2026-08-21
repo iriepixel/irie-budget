@@ -207,12 +207,16 @@ export function BudgetView({ spendings, salaries, user }: Props) {
             </a>
           </Button>
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/categories" aria-label="Spending by category">
+            <Link
+              href="/categories"
+              prefetch
+              aria-label="Spending by category"
+            >
               <ChartPie />
             </Link>
           </Button>
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/pot" aria-label="Savings pot">
+            <Link href="/pot" prefetch aria-label="Savings pot">
               <PiggyBank />
             </Link>
           </Button>

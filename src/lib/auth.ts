@@ -54,6 +54,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     },
   },
+  session: {
+    // Every page and every action verifies the session, which was a Neon
+    // round trip each time. The signed cookie snapshot removes it.
+    cookieCache: { enabled: true, maxAge: 5 * 60 },
+  },
   // Send auth failures back to the sign-in page instead of better-auth's
   // own error route, so the reason can be shown in the UI.
   onAPIError: { errorURL: "/sign-in" },
