@@ -112,6 +112,39 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+
+/**
+ * Chart palette, validated with the data-viz palette checker against this
+ * app's own surfaces (#ffffff light, #171717 dark card):
+ *   viz-1..3  categorical, all-pairs clean in both modes
+ *   viz-seq-* ordinal ramp, one hue, monotone lightness, spaced steps
+ * Do not add a fourth categorical hue: past three the pairs stop clearing
+ * the colour-blindness floors. Fold extra series into "other" instead.
+ */
+:root {
+  --viz-1: #2a78d6;
+  --viz-2: #eb6834;
+  --viz-3: #1baf7a;
+  --viz-seq-1: #104281;
+  --viz-seq-2: #1c5cab;
+  --viz-seq-3: #2a78d6;
+  --viz-seq-4: #5598e7;
+  --viz-seq-5: #86b6ef;
+  --viz-other: #9a9a9a;
+}
+
+.dark {
+  --viz-1: #3987e5;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-seq-1: #cde2fb;
+  --viz-seq-2: #9ec5f4;
+  --viz-seq-3: #6da7ec;
+  --viz-seq-4: #3987e5;
+  --viz-seq-5: #256abf;
+  --viz-other: #6b6b6b;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

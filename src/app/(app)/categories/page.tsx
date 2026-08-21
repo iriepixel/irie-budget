@@ -1,8 +1,8 @@
-import { CategoryBreakdown } from "@/components/category-breakdown"
+import { CategoryCharts } from "@/components/category-charts"
 import { getSpendings } from "@/lib/queries"
 
 export default async function CategoriesPage() {
   const spendings = await getSpendings()
 
-  return <CategoryBreakdown spendings={spendings} />
+  return <CategoryCharts spendings={spendings} />
 }
