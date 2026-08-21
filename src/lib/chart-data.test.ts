@@ -96,7 +96,12 @@ describe("cumulativeByDay", () => {
 
 describe("formatTick", () => {
   it("shortens thousands so the axis stays narrow", () => {
-    expect(formatTick(2500)).toBe("£3k")
     expect(formatTick(950)).toBe("£950")
+    expect(formatTick(12_400)).toBe("£12k")
+  })
+
+  it("keeps a decimal below ten thousand, so £2,500 is not called £3k", () => {
+    expect(formatTick(2500)).toBe("£2.5k")
+    expect(formatTick(2000)).toBe("£2k")
   })
 })

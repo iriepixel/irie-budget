@@ -63,6 +63,13 @@ export const SPENDING_KINDS = ["recurring", "oneOff", "food"] as const
 
 export type SpendingKind = (typeof SPENDING_KINDS)[number]
 
+/** The one place a kind is given a human name. */
+export const KIND_LABELS: Record<SpendingKind, string> = {
+  recurring: "Recurring",
+  oneOff: "One-off",
+  food: "Food",
+}
+
 export type Spending = {
   id: string
   title: string

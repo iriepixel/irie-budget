@@ -27,6 +27,7 @@ import {
 import {
   CATEGORY_GROUPS,
   currentDay,
+  KIND_LABELS,
   DAYS,
   formatDay,
   type Category,
@@ -35,12 +36,6 @@ import {
 } from "@/lib/spendings"
 
 type Values = Omit<Spending, "id" | "kind" | "owner">
-
-const KIND_LABELS: Record<SpendingKind, string> = {
-  recurring: "recurring spending",
-  oneOff: "one-off spending",
-  food: "food spending",
-}
 
 const KIND_DESCRIPTIONS: Record<SpendingKind, (name: string) => string> = {
   recurring: (name) => `A cost of ${name}'s that repeats every month.`,
@@ -133,7 +128,7 @@ function SpendingForm({
     <form onSubmit={handleSubmit} className="grid gap-6">
       <DialogHeader>
         <DialogTitle>
-          {spending ? "Edit" : "Add"} {KIND_LABELS[kind]}
+          {spending ? "Edit" : "Add"} {KIND_LABELS[kind].toLowerCase()} spending
         </DialogTitle>
         <DialogDescription>
           {KIND_DESCRIPTIONS[kind](name)}

@@ -4,6 +4,7 @@ import { useSyncExternalStore, useTransition } from "react"
 import { Upload } from "lucide-react"
 
 import { importLegacyData } from "@/app/actions"
+import { report } from "@/lib/report"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { CATEGORIES, type Category, type Owner } from "@/lib/spendings"
@@ -59,8 +60,12 @@ export function LegacyImport({ hasData }: { hasData: boolean }) {
             disabled={pending}
             onClick={() =>
               startTransition(async () => {
-                await importLegacyData(payload)
-                dismiss()
+                const ok = await report(
+                  () => importLegacyData(payload),
+                  "Import failed"
+                )
+                // Only clear the browser copy once the server confirmed it.
+                if (ok) dismiss()
               })
             }
           >

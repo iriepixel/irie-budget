@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { ChartPie, Download, House, LogOut, PiggyBank } from "lucide-react"
@@ -35,6 +36,15 @@ export function AppHeader({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+
+  // Two people share this ledger from different devices. A server action
+  // only refreshes the tab that ran it, so catch this tab up whenever it
+  // regains focus. The header renders on every signed-in page.
+  useEffect(() => {
+    const onFocus = () => router.refresh()
+    window.addEventListener("focus", onFocus)
+    return () => window.removeEventListener("focus", onFocus)
+  }, [router])
 
   return (
     <div className="mb-8 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">

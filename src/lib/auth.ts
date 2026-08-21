@@ -70,7 +70,10 @@ export const auth = betterAuth({
         // returning false keeps the reason attached to the redirect.
         before: async (user) => {
           if (!isAllowed(user.email)) {
-            console.warn(`[auth] refused sign-in for ${user.email}`)
+            const [local = "", domain = ""] = (user.email ?? "").split("@")
+            console.warn(
+              `[auth] refused sign-in for ${local.slice(0, 2)}…@${domain}`
+            )
             throw new APIError("FORBIDDEN", {
               code: "EMAIL_NOT_ALLOWED",
               message: "That account is not allowed to use this app.",

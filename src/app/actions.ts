@@ -23,9 +23,11 @@ const salaryInput = z.object({
   amount: z.number().min(0).max(1_000_000),
 })
 
+// Caps sized for the integer pence columns: int4 tops out around £21.4M,
+// so a larger zod bound would let a validated input crash in Postgres.
 const potInput = z.object({
-  amount: z.number().min(0).max(100_000_000),
-  goal: z.number().min(0).max(100_000_000),
+  amount: z.number().min(0).max(1_000_000),
+  goal: z.number().min(0).max(1_000_000),
 })
 
 export async function setPot(input: unknown) {
@@ -52,6 +54,7 @@ export async function addSpending(input: unknown) {
     .values({ title, amountPence: toPence(amount), day, category, kind, owner })
 
   revalidatePath("/")
+  revalidatePath("/categories")
 }
 
 export async function updateSpending(id: string, input: unknown) {
@@ -66,6 +69,7 @@ export async function updateSpending(id: string, input: unknown) {
     .where(eq(spendings.id, z.uuid().parse(id)))
 
   revalidatePath("/")
+  revalidatePath("/categories")
 }
 
 export async function deleteSpending(id: string) {
@@ -74,6 +78,7 @@ export async function deleteSpending(id: string) {
   await db.delete(spendings).where(eq(spendings.id, z.uuid().parse(id)))
 
   revalidatePath("/")
+  revalidatePath("/categories")
 }
 
 export async function setSalary(input: unknown) {
@@ -103,26 +108,39 @@ export async function importLegacyData(input: unknown) {
     })
     .parse(input)
 
+  // One atomic batch: a partial import cannot be told apart from a failed
+  // one from the browser, and retrying a partial import duplicates rows.
+  const statements = []
+
   if (rows.length > 0) {
-    await db.insert(spendings).values(
-      rows.map(({ title, amount, day, category, kind, owner }) => ({
-        title,
-        amountPence: toPence(amount),
-        day,
-        category,
-        kind,
-        owner,
-      }))
+    statements.push(
+      db.insert(spendings).values(
+        rows.map(({ title, amount, day, category, kind, owner }) => ({
+          title,
+          amountPence: toPence(amount),
+          day,
+          category,
+          kind,
+          owner,
+        }))
+      )
     )
   }
 
   for (const { owner, amount } of pay) {
     const amountPence = toPence(amount)
-    await db
-      .insert(salaries)
-      .values({ owner, amountPence })
-      .onConflictDoUpdate({ target: salaries.owner, set: { amountPence } })
+    statements.push(
+      db
+        .insert(salaries)
+        .values({ owner, amountPence })
+        .onConflictDoUpdate({ target: salaries.owner, set: { amountPence } })
+    )
+  }
+
+  if (statements.length > 0) {
+    await db.batch(statements as [(typeof statements)[number]])
   }
 
   revalidatePath("/")
+  revalidatePath("/categories")
 }

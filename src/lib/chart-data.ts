@@ -1,19 +1,13 @@
 import {
   formatAmount,
+  KIND_LABELS,
   OWNERS,
   SPENDING_KINDS,
   sumAmounts,
   type Category,
   type Owner,
   type Spending,
-  type SpendingKind,
 } from "@/lib/spendings"
-
-export const KIND_LABELS: Record<SpendingKind, string> = {
-  recurring: "Recurring",
-  oneOff: "One-off",
-  food: "Food",
-}
 
 /** Part-to-whole reads at a glance only, so cap the slices and fold the rest. */
 export const TOP_SLICES = 5
@@ -85,7 +79,12 @@ export function cumulativeByDay(spendings: Spending[]) {
   })
 }
 
-export const formatTick = (value: number) =>
-  value >= 1000 ? `£${Math.round(value / 1000)}k` : `£${Math.round(value)}`
+/** Axis ticks: whole pounds, then 1dp thousands so £2,500 is not "£3k". */
+export const formatTick = (value: number) => {
+  if (value < 1000) return `£${Math.round(value)}`
+  const thousands = value / 1000
+  const shown = thousands < 10 ? thousands.toFixed(1).replace(/\.0$/, "") : String(Math.round(thousands))
+  return `£${shown}k`
+}
 
 export { formatAmount }
