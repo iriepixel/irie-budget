@@ -5,7 +5,13 @@ import { Pencil, PiggyBank } from "lucide-react"
 
 import { PotDialog } from "@/components/pot-dialog"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { setPot } from "@/app/actions"
 import { potProgress } from "@/lib/pot-progress"
 import { report } from "@/lib/report"
@@ -23,7 +29,16 @@ export function PotView({ pot }: { pot: Pot }) {
   return (
     <>
       <Card>
-        <CardContent className="flex flex-col items-center gap-6 py-12">
+        <CardHeader>
+          <CardTitle>Savings pot</CardTitle>
+          <CardAction>
+            <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+              <Pencil />
+              Update
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-6 py-8">
           <div className="flex size-14 items-center justify-center rounded-full bg-muted">
             <PiggyBank className="size-7 text-muted-foreground" />
           </div>
@@ -52,11 +67,6 @@ export function PotView({ pot }: { pot: Pot }) {
               </p>
             )}
           </div>
-
-          <Button variant="outline" onClick={() => setOpen(true)}>
-            <Pencil />
-            Update
-          </Button>
         </CardContent>
       </Card>
 
