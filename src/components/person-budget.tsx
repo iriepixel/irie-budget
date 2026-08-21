@@ -2,6 +2,7 @@
 
 import { Pencil, Plus } from "lucide-react"
 
+import { SpendMeter } from "@/components/spend-meter"
 import { SpendingsTable } from "@/components/spendings-table"
 import { Button } from "@/components/ui/button"
 import {
@@ -86,6 +87,19 @@ export function PersonBudget({
             </Button>
           </CardAction>
         </CardHeader>
+        {salary > 0 ? (
+          <CardContent>
+            <SpendMeter
+              salary={salary}
+              byKind={{
+                recurring: recurringTotal,
+                oneOff: oneOffTotal,
+                food: foodTotal,
+              }}
+              total={monthTotal}
+            />
+          </CardContent>
+        ) : null}
       </Card>
 
       <Card className="gap-0 overflow-hidden py-0">
