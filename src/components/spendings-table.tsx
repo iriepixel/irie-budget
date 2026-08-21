@@ -106,7 +106,7 @@ export function SpendingsTable({
           the edit dialog, and delete lives inside it. The columns that made
           the table overflow are folded into the second line. */}
       <div className="sm:hidden">
-        <div className="flex items-center gap-2 border-b px-4 pb-3">
+        <div className="flex items-center gap-2 border-b px-4 py-3">
           <span className="text-xs text-muted-foreground">Sort</span>
           <Select
             value={column}
@@ -147,13 +147,19 @@ export function SpendingsTable({
                 className="flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors active:bg-muted"
               >
                 <span className="flex w-full items-baseline justify-between gap-3">
-                  <span className="truncate font-medium">{spending.title}</span>
+                  <span className="flex min-w-0 items-baseline gap-2">
+                    <span className="w-6 shrink-0 text-xs text-muted-foreground tabular-nums">
+                      {formatDay(spending.day)}
+                    </span>
+                    <span className="truncate font-medium">
+                      {spending.title}
+                    </span>
+                  </span>
                   <span className="whitespace-nowrap tabular-nums">
                     {formatAmount(spending.amount)}
                   </span>
                 </span>
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="tabular-nums">{formatDay(spending.day)}</span>
+                <span className="flex items-center pl-8 text-xs text-muted-foreground">
                   <CategoryBadge
                     category={spending.category}
                     className="px-1.5 py-0 text-[11px]"
