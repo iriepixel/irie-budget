@@ -210,6 +210,7 @@ export function BudgetView({ spendings, salaries }: Props) {
         spending={target.spending}
         kind={target.kind}
         name={OWNERS.find(({ id }) => id === target.owner)?.name ?? ""}
+        onDelete={handleDelete}
         onSubmit={handleSpendingSubmit}
       />
     </>

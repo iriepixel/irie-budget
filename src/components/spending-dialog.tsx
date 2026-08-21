@@ -1,6 +1,19 @@
 "use client"
 
 import { Fragment, useState } from "react"
+import { Trash2 } from "lucide-react"
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 import { AmountInput } from "@/components/amount-input"
 import { Button } from "@/components/ui/button"
@@ -49,6 +62,9 @@ type Props = {
   onOpenChange: (open: boolean) => void
   /** Present when editing an existing spending. */
   spending: Spending | null
+  /** Deletes the spending being edited. On a phone the rows have no
+      buttons of their own, so this is the only route to delete. */
+  onDelete: (id: string) => void
   /** Which list the spending belongs to, shown in the dialog copy. */
   kind: SpendingKind
   /** Whose spending it is. */
@@ -62,6 +78,7 @@ export function SpendingDialog({
   spending,
   kind,
   name,
+  onDelete,
   onSubmit,
 }: Props) {
   return (
@@ -72,6 +89,14 @@ export function SpendingDialog({
           spending={spending}
           kind={kind}
           name={name}
+          onDelete={
+            spending
+              ? () => {
+                  onDelete(spending.id)
+                  onOpenChange(false)
+                }
+              : undefined
+          }
           onSubmit={(values) => {
             onSubmit(values)
             onOpenChange(false)
@@ -87,12 +112,14 @@ function SpendingForm({
   spending,
   kind,
   name,
+  onDelete,
   onSubmit,
   onCancel,
 }: {
   spending: Spending | null
   kind: SpendingKind
   name: string
+  onDelete?: () => void
   onSubmit: (values: Values) => void
   onCancel: () => void
 }) {
@@ -210,7 +237,35 @@ function SpendingForm({
         ) : null}
       </div>
 
-      <DialogFooter>
+      <DialogFooter className="gap-y-2">
+        {spending && onDelete ? (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                className="text-destructive hover:text-destructive sm:mr-auto"
+              >
+                <Trash2 />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete {spending.title}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={onDelete}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : null}
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>

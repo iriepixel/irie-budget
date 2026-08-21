@@ -23,6 +23,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
   Table,
   TableBody,
   TableCell,
@@ -35,6 +42,13 @@ import { cn } from "@/lib/utils"
 
 type SortColumn = "day" | "title" | "category" | "amount"
 type SortDirection = "asc" | "desc"
+
+const SORT_LABELS: Record<SortColumn, string> = {
+  day: "Day",
+  title: "Title",
+  category: "Category",
+  amount: "Amount",
+}
 
 type Props = {
   spendings: Spending[]
@@ -87,7 +101,71 @@ export function SpendingsTable({
   }
 
   return (
-    <div className="overflow-x-auto">
+    <>
+      {/* On a phone the table becomes a two-line list: tapping a row opens
+          the edit dialog, and delete lives inside it. The columns that made
+          the table overflow are folded into the second line. */}
+      <div className="sm:hidden">
+        <div className="flex items-center gap-2 border-b px-4 pb-3">
+          <span className="text-xs text-muted-foreground">Sort</span>
+          <Select
+            value={column}
+            onValueChange={(value) => {
+              setColumn(value as SortColumn)
+              setDirection("asc")
+            }}
+          >
+            <SelectTrigger size="sm" className="h-8 w-auto gap-1 border-none bg-transparent px-2 shadow-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(SORT_LABELS) as SortColumn[]).map((option) => (
+                <SelectItem key={option} value={option}>
+                  {SORT_LABELS[option]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={direction === "asc" ? "Sorted ascending" : "Sorted descending"}
+            onClick={() =>
+              setDirection((current) => (current === "asc" ? "desc" : "asc"))
+            }
+          >
+            {direction === "asc" ? <ArrowUp /> : <ArrowDown />}
+          </Button>
+        </div>
+
+        <ul>
+          {sorted.map((spending) => (
+            <li key={spending.id} className="border-b last:border-b-0">
+              <button
+                type="button"
+                onClick={() => onEdit(spending)}
+                className="flex w-full flex-col gap-1 px-4 py-3 text-left transition-colors active:bg-muted"
+              >
+                <span className="flex w-full items-baseline justify-between gap-3">
+                  <span className="truncate font-medium">{spending.title}</span>
+                  <span className="whitespace-nowrap tabular-nums">
+                    {formatAmount(spending.amount)}
+                  </span>
+                </span>
+                <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="tabular-nums">{formatDay(spending.day)}</span>
+                  <CategoryBadge
+                    category={spending.category}
+                    className="px-1.5 py-0 text-[11px]"
+                  />
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+    <div className="hidden overflow-x-auto sm:block">
       <Table>
         <TableHeader>
           <TableRow>
@@ -107,9 +185,7 @@ export function SpendingsTable({
                 onClick={() => toggle("title")}
               />
             </TableHead>
-            {/* Category is the least essential column, so it folds under the
-                title on a phone rather than forcing a sideways scroll. */}
-            <TableHead className="hidden sm:table-cell">
+            <TableHead>
               <SortButton
                 label="Category"
                 active={column === "category"}
@@ -140,22 +216,15 @@ export function SpendingsTable({
               <TableCell className="pl-4 text-muted-foreground tabular-nums">
                 {formatDay(spending.day)}
               </TableCell>
-              <TableCell className="font-medium">
-                {spending.title}
-                <span className="mt-1 block sm:hidden">
-                  <CategoryBadge category={spending.category} />
-                </span>
-              </TableCell>
-              <TableCell className="hidden sm:table-cell">
+              <TableCell className="font-medium">{spending.title}</TableCell>
+              <TableCell>
                 <CategoryBadge category={spending.category} />
               </TableCell>
               <TableCell className="text-right whitespace-nowrap tabular-nums">
                 {formatAmount(spending.amount)}
               </TableCell>
               <TableCell className="pr-4">
-                {/* Touch devices never hover, so the actions stay visible
-                    below sm instead of being unreachable. */}
-                <div className="flex justify-end gap-1 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+                <div className="flex justify-end gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
                   <Button
                     size="icon-sm"
                     variant="ghost"
@@ -202,6 +271,7 @@ export function SpendingsTable({
         </TableBody>
       </Table>
     </div>
+    </>
   )
 }
 
