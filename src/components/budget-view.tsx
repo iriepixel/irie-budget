@@ -3,9 +3,8 @@
 import { useMemo, useOptimistic, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut, PiggyBank } from "lucide-react"
+import { ChartPie, LogOut, PiggyBank } from "lucide-react"
 
-import { CategoryBreakdown } from "@/components/category-breakdown"
 import { HouseholdSummary } from "@/components/household-summary"
 import { LegacyImport } from "@/components/legacy-import"
 import { PersonBudget } from "@/components/person-budget"
@@ -193,6 +192,11 @@ export function BudgetView({ spendings, salaries, user }: Props) {
             <AvatarFallback>{initials(user.name)}</AvatarFallback>
           </Avatar>
           <Button variant="ghost" size="icon" asChild>
+            <Link href="/categories" aria-label="Spending by category">
+              <ChartPie />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="icon" asChild>
             <Link href="/pot" aria-label="Savings pot">
               <PiggyBank />
             </Link>
@@ -237,12 +241,11 @@ export function BudgetView({ spendings, salaries, user }: Props) {
           ))}
         </Tabs>
 
-        <div className="mt-10 space-y-6">
+        <div className="mt-10">
           <HouseholdSummary
             salaries={shownSalaries}
             spendings={shownSpendings}
           />
-          <CategoryBreakdown spendings={shownSpendings} />
         </div>
       </div>
 

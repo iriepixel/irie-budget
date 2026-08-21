@@ -1,5 +1,3 @@
-"use client"
-
 import { CategoryBadge } from "@/components/category-badge"
 import {
   Card,

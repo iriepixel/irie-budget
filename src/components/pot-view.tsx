@@ -1,11 +1,10 @@
 "use client"
 
 import { useOptimistic, useState, useTransition } from "react"
-import Link from "next/link"
-import { ArrowLeft, Pencil, PiggyBank } from "lucide-react"
+import { Pencil, PiggyBank } from "lucide-react"
 
+import { PageHeader } from "@/components/page-header"
 import { PotDialog } from "@/components/pot-dialog"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { setPot } from "@/app/actions"
@@ -18,15 +17,7 @@ export function PotView({ saved }: { saved: number }) {
 
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 md:py-16">
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/">
-            <ArrowLeft />
-            Budget
-          </Link>
-        </Button>
-        <ThemeToggle />
-      </div>
+      <PageHeader />
 
       <Card>
         <CardContent className="flex flex-col items-center gap-6 py-12">
