@@ -45,7 +45,11 @@ export function HouseholdSummary({ salaries, spendings }: Props) {
         <Stat
           label="Total spendings"
           value={formatAmount(total)}
-          hint={`${formatAmount(recurring)} recurring · ${formatAmount(oneOff)} one-off · ${formatAmount(food)} food`}
+          hints={[
+            `${formatAmount(recurring)} recurring`,
+            `${formatAmount(oneOff)} one-off`,
+            `${formatAmount(food)} food`,
+          ]}
         />
         <Stat
           label={remaining < 0 ? "Over budget by" : "Left to spend"}
@@ -90,12 +94,12 @@ export function HouseholdSummary({ salaries, spendings }: Props) {
 function Stat({
   label,
   value,
-  hint,
+  hints,
   className,
 }: {
   label: string
   value: string
-  hint?: string
+  hints?: string[]
   className?: string
 }) {
   return (
@@ -109,7 +113,15 @@ function Stat({
       >
         {value}
       </p>
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hints?.length ? (
+        <div className="space-y-0.5 pt-1">
+          {hints.map((hint, index) => (
+            <p key={index} className="text-xs text-muted-foreground">
+              {hint}
+            </p>
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }
