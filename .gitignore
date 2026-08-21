@@ -42,3 +42,9 @@ next-env.d.ts
 
 # ...but the template is safe to commit
 !.env.example
+
+# Local Netlify folder
+.netlify
+
+# Netlify edge function bundling (Deno)
+deno.lock
