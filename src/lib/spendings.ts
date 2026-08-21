@@ -1,6 +1,7 @@
 export const CATEGORIES = [
   "Food",
-  "Rent",
+  "Mortgage",
+  "House",
   "Insurance",
   "Car",
   "Child",
@@ -10,6 +11,7 @@ export const CATEGORIES = [
   "Entertainment",
   "Shopping",
   "Subscription",
+  "Bank",
   "Investment",
   "Savings",
   "Other",

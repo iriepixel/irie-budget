@@ -69,7 +69,7 @@ export function PersonBudget({
       <Card>
         <CardHeader>
           <CardDescription>Monthly salary</CardDescription>
-          <CardTitle className="text-2xl tabular-nums">
+          <CardTitle className="text-3xl whitespace-nowrap tabular-nums sm:text-4xl">
             {formatAmount(salary)}
           </CardTitle>
           <CardAction>
@@ -134,7 +134,7 @@ export function PersonBudget({
             <SpendingsTable
               spendings={food}
               emptyMessage="No food spendings yet"
-                onEdit={onEdit}
+              onEdit={onEdit}
               onDelete={onDelete}
             />
           </CardContent>

@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import { CategoryBadge } from "@/components/category-badge"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -132,11 +132,11 @@ export function SpendingsTable({
               <TableCell className="font-medium">
                 {spending.title}
                 <span className="mt-1 block sm:hidden">
-                  <Badge variant="secondary">{spending.category}</Badge>
+                  <CategoryBadge category={spending.category} />
                 </span>
               </TableCell>
               <TableCell className="hidden sm:table-cell">
-                <Badge variant="secondary">{spending.category}</Badge>
+                <CategoryBadge category={spending.category} />
               </TableCell>
               <TableCell className="text-right whitespace-nowrap tabular-nums">
                 {formatAmount(spending.amount)}
