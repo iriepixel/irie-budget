@@ -3,6 +3,8 @@
 import { useOptimistic, useState, useTransition } from "react"
 import { Pencil, PiggyBank } from "lucide-react"
 
+import { report } from "@/lib/report"
+
 import { PageHeader } from "@/components/page-header"
 import { PotDialog } from "@/components/pot-dialog"
 import { Button } from "@/components/ui/button"
@@ -46,7 +48,7 @@ export function PotView({ saved }: { saved: number }) {
         onSubmit={(amount) =>
           startTransition(async () => {
             setShownSaved(amount)
-            await setPot({ amount })
+            await report(() => setPot({ amount }), "Could not save the pot")
           })
         }
       />

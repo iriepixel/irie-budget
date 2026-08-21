@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Fragment, useState } from "react"
 
+import { AmountInput } from "@/components/amount-input"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,12 +17,15 @@ import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
 import {
-  CATEGORIES,
+  CATEGORY_GROUPS,
   currentDay,
   DAYS,
   formatDay,
@@ -151,14 +155,10 @@ function SpendingForm({
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-3">
             <Label htmlFor="amount">Amount</Label>
-            <Input
+            <AmountInput
               id="amount"
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
               placeholder="0.00"
             />
           </div>
@@ -189,10 +189,20 @@ function SpendingForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {CATEGORIES.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
+              {CATEGORY_GROUPS.map((group, index) => (
+                <Fragment key={group.label}>
+                  {index > 0 ? <SelectSeparator /> : null}
+                  <SelectGroup>
+                    <SelectLabel className="pt-2 text-[11px] font-semibold tracking-widest text-foreground/70 uppercase">
+                      {group.label}
+                    </SelectLabel>
+                    {group.categories.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </Fragment>
               ))}
             </SelectContent>
           </Select>

@@ -19,6 +19,32 @@ export const CATEGORIES = [
 
 export type Category = (typeof CATEGORIES)[number]
 
+/** How the categories are grouped in the picker, so a phone shows fewer. */
+export const CATEGORY_GROUPS = [
+  { label: "Home", categories: ["Mortgage", "House", "Utilities", "Insurance"] },
+  { label: "Living", categories: ["Food", "Transport", "Car", "Child", "Health"] },
+  {
+    label: "Lifestyle",
+    categories: ["Entertainment", "Shopping", "Subscription"],
+  },
+  { label: "Money", categories: ["Bank", "Investment", "Savings"] },
+  { label: "Other", categories: ["Other"] },
+] as const satisfies readonly {
+  label: string
+  categories: readonly Category[]
+}[]
+
+type GroupedCategory = (typeof CATEGORY_GROUPS)[number]["categories"][number]
+type Assert<T extends true> = T
+
+/**
+ * Adding a category without putting it in a group fails the build here,
+ * rather than quietly leaving it out of the picker.
+ */
+export type EveryCategoryIsGrouped = Assert<
+  Exclude<Category, GroupedCategory> extends never ? true : false
+>
+
 /** The two people the budget is split between. */
 export const OWNERS = [
   { id: "jev", name: "Jev" },

@@ -3,21 +3,13 @@ import "server-only"
 import { eq } from "drizzle-orm"
 
 import { db, pot, salaries, spendings } from "@/lib/db"
+import { toPence, toPounds } from "@/lib/money"
 import {
   OWNER_IDS,
   type Owner,
   type Salaries,
   type Spending,
 } from "@/lib/spendings"
-
-/** Money lives in the database as integer pence; the UI works in pounds. */
-export function toPence(pounds: number) {
-  return Math.round(pounds * 100)
-}
-
-export function toPounds(pence: number) {
-  return pence / 100
-}
 
 export async function getBudget(): Promise<{
   spendings: Spending[]
@@ -59,3 +51,5 @@ export async function getPot(): Promise<number> {
   const [row] = await db.select().from(pot).where(eq(pot.id, POT_ID))
   return row ? toPounds(row.amountPence) : 0
 }
+
+export { toPence, toPounds }

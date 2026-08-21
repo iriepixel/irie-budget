@@ -3,7 +3,8 @@
 import { useMemo, useOptimistic, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ChartPie, LogOut, PiggyBank } from "lucide-react"
+import { report } from "@/lib/report"
+import { ChartPie, Download, LogOut, PiggyBank } from "lucide-react"
 
 import { HouseholdSummary } from "@/components/household-summary"
 import { LegacyImport } from "@/components/legacy-import"
@@ -119,14 +120,20 @@ export function BudgetView({ spendings, salaries, user }: Props) {
           type: "update",
           spending: { ...values, id: spending.id, kind, owner },
         })
-        await updateSpending(spending.id, { ...values, kind, owner })
+        await report(
+          () => updateSpending(spending.id, { ...values, kind, owner }),
+          `Could not save ${values.title}`
+        )
       } else {
         // A throwaway id, replaced when the server data arrives.
         addWrite({
           type: "add",
           spending: { ...values, id: crypto.randomUUID(), kind, owner },
         })
-        await addSpending({ ...values, kind, owner })
+        await report(
+          () => addSpending({ ...values, kind, owner }),
+          `Could not add ${values.title}`
+        )
       }
     })
   }
@@ -134,7 +141,7 @@ export function BudgetView({ spendings, salaries, user }: Props) {
   function handleDelete(id: string) {
     startTransition(async () => {
       addWrite({ type: "delete", id })
-      await deleteSpending(id)
+      await report(() => deleteSpending(id), "Could not delete that spending")
     })
   }
 
@@ -143,7 +150,10 @@ export function BudgetView({ spendings, salaries, user }: Props) {
 
     startTransition(async () => {
       setShownSalary({ owner: salaryOwner, amount })
-      await setSalary({ owner: salaryOwner, amount })
+      await report(
+        () => setSalary({ owner: salaryOwner, amount }),
+        "Could not save the salary"
+      )
     })
   }
 
@@ -191,6 +201,11 @@ export function BudgetView({ spendings, salaries, user }: Props) {
             <AvatarImage src={user.image ?? undefined} alt={user.name} />
             <AvatarFallback>{initials(user.name)}</AvatarFallback>
           </Avatar>
+          <Button variant="ghost" size="icon" asChild>
+            <a href="/api/backup" download aria-label="Download a backup">
+              <Download />
+            </a>
+          </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link href="/categories" aria-label="Spending by category">
               <ChartPie />

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 
+import { AmountInput } from "@/components/amount-input"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 type Props = {
@@ -73,14 +73,10 @@ function PotForm({
 
       <div className="grid gap-3">
         <Label htmlFor="saved">Amount</Label>
-        <Input
+        <AmountInput
           id="saved"
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          min="0"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onValueChange={setAmount}
           placeholder="0.00"
           autoFocus
         />
