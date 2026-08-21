@@ -38,7 +38,9 @@ export function PotView({ pot }: { pot: Pot }) {
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent className="flex flex-col items-center gap-6 py-8">
+        {/* Heavier bottom padding: the header eats into the top gap, so
+            equal padding reads as bottom-light. */}
+        <CardContent className="flex flex-col items-center gap-6 pt-8 pb-20">
           <div className="flex size-14 items-center justify-center rounded-full bg-muted">
             <PiggyBank className="size-7 text-muted-foreground" />
           </div>

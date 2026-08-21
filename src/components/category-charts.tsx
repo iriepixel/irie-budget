@@ -81,11 +81,13 @@ export function CategoryCharts({ spendings }: { spendings: Spending[] }) {
 
   return (
     <Tabs defaultValue="amounts" className="gap-6">
-      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+      {/* One row of four: the list has a fixed height, so wrapping to a
+          second row leaves the extra tabs outside its background. */}
+      <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="amounts">Amounts</TabsTrigger>
-        <TabsTrigger value="kind">By kind</TabsTrigger>
-        <TabsTrigger value="person">By person</TabsTrigger>
-        <TabsTrigger value="day">By day</TabsTrigger>
+        <TabsTrigger value="kind">Kind</TabsTrigger>
+        <TabsTrigger value="person">Person</TabsTrigger>
+        <TabsTrigger value="day">Day</TabsTrigger>
       </TabsList>
 
       <TabsContent value="amounts" className="min-w-0">
