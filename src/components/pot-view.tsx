@@ -5,7 +5,6 @@ import { Pencil, PiggyBank } from "lucide-react"
 
 import { report } from "@/lib/report"
 
-import { PageHeader } from "@/components/page-header"
 import { PotDialog } from "@/components/pot-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -18,9 +17,7 @@ export function PotView({ saved }: { saved: number }) {
   const [shownSaved, setShownSaved] = useOptimistic(saved)
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6 md:py-16">
-      <PageHeader />
-
+    <>
       <Card>
         <CardContent className="flex flex-col items-center gap-6 py-12">
           <div className="flex size-14 items-center justify-center rounded-full bg-muted">
@@ -52,6 +49,6 @@ export function PotView({ saved }: { saved: number }) {
           })
         }
       />
-    </main>
+    </>
   )
 }

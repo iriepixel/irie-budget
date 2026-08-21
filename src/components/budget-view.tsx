@@ -1,23 +1,13 @@
 "use client"
 
 import { useMemo, useOptimistic, useState, useTransition } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { report } from "@/lib/report"
-import { ChartPie, Download, LogOut, PiggyBank } from "lucide-react"
 
 import { HouseholdSummary } from "@/components/household-summary"
 import { LegacyImport } from "@/components/legacy-import"
 import { PersonBudget } from "@/components/person-budget"
-import { ThemeToggle } from "@/components/theme-toggle"
 import { SalaryDialog } from "@/components/salary-dialog"
 import { SpendingDialog } from "@/components/spending-dialog"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import {
   Tabs,
   TabsContent,
@@ -30,7 +20,6 @@ import {
   setSalary,
   updateSpending,
 } from "@/app/actions"
-import { signOut } from "@/lib/auth-client"
 import {
   OWNERS,
   type Owner,
@@ -38,18 +27,6 @@ import {
   type Spending,
   type SpendingKind,
 } from "@/lib/spendings"
-
-/** Shown until the picture loads, or when the account has none. */
-function initials(name: string) {
-  const letters = name
-    .split(/[\s@.]+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-
-  return letters.toUpperCase() || "?"
-}
 
 /** A write that has been sent but not yet confirmed by the server. */
 type PendingWrite =
@@ -76,10 +53,9 @@ type Target = { owner: Owner; kind: SpendingKind; spending: Spending | null }
 type Props = {
   spendings: Spending[]
   salaries: Salaries
-  user: { name: string; image: string | null }
 }
 
-export function BudgetView({ spendings, salaries, user }: Props) {
+export function BudgetView({ spendings, salaries }: Props) {
   const [target, setTarget] = useState<Target>({
     owner: "jev",
     kind: "recurring",
@@ -88,7 +64,6 @@ export function BudgetView({ spendings, salaries, user }: Props) {
   const [spendingOpen, setSpendingOpen] = useState(false)
   const [salaryOwner, setSalaryOwner] = useState<Owner | null>(null)
   const [, startTransition] = useTransition()
-  const router = useRouter()
 
   // Show the result immediately; the server action revalidates behind it.
   const [shownSpendings, addWrite] = useOptimistic(spendings, applyWrite)
@@ -186,57 +161,8 @@ export function BudgetView({ spendings, salaries, user }: Props) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-16">
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            IRIE Budget
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Every pound has a plan.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Avatar className="size-8">
-            <AvatarImage src={user.image ?? undefined} alt={user.name} />
-            <AvatarFallback>{initials(user.name)}</AvatarFallback>
-          </Avatar>
-          <Button variant="ghost" size="icon" asChild>
-            <a href="/api/backup" download aria-label="Download a backup">
-              <Download />
-            </a>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link
-              href="/categories"
-              prefetch
-              aria-label="Spending by category"
-            >
-              <ChartPie />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/pot" prefetch aria-label="Savings pot">
-              <PiggyBank />
-            </Link>
-          </Button>
-          <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Sign out"
-            onClick={() =>
-              signOut({
-                fetchOptions: { onSuccess: () => router.push("/sign-in") },
-              })
-            }
-          >
-            <LogOut />
-          </Button>
-        </div>
-      </div>
-
-      <LegacyImport hasData={spendings.length > 0} />
+    <>
+      <LegacyImport hasData={shownSpendings.length > 0} />
 
       <div>
         {/* Two columns side by side once there is room for them. */}
@@ -286,6 +212,6 @@ export function BudgetView({ spendings, salaries, user }: Props) {
         name={OWNERS.find(({ id }) => id === target.owner)?.name ?? ""}
         onSubmit={handleSpendingSubmit}
       />
-    </main>
+    </>
   )
 }
