@@ -77,7 +77,8 @@ export function SpendingsTable({
         return factor * a.category.localeCompare(b.category) || a.day - b.day
       }
       if (column === "amount") return factor * (a.amount - b.amount)
-      return factor * (a.day - b.day)
+      // Same day shows the biggest amount first, whichever way days run.
+      return factor * (a.day - b.day) || b.amount - a.amount
     })
   }, [spendings, column, direction])
 
