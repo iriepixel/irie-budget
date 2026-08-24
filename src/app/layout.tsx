@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 import { ServiceWorker } from "@/components/service-worker";
+import { SPLASH_DEVICES, splashMedia, splashSize } from "@/lib/splash";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -24,6 +25,12 @@ export const metadata: Metadata = {
     capable: true,
     title: "IRIE Budget",
     statusBarStyle: "default",
+    // The launch screen iOS shows before first paint — previously a plain
+    // black rectangle from the manifest's background colour.
+    startupImage: SPLASH_DEVICES.map((device) => ({
+      url: `/splash/${splashSize(device)}`,
+      media: splashMedia(device),
+    })),
   },
 };
 
