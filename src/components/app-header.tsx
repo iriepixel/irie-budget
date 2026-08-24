@@ -64,7 +64,17 @@ export function AppHeader({
   // only refreshes the tab that ran it, so catch this tab up whenever it
   // regains focus. The header renders on every signed-in page.
   useEffect(() => {
-    const onFocus = () => router.refresh()
+    // The focus event also fires on a fresh load, which on iOS is every
+    // relaunch — without the guard each cold open paid for two full
+    // server renders back to back.
+    let last = Date.now()
+
+    const onFocus = () => {
+      if (Date.now() - last < 15_000) return
+      last = Date.now()
+      router.refresh()
+    }
+
     window.addEventListener("focus", onFocus)
     return () => window.removeEventListener("focus", onFocus)
   }, [router])
