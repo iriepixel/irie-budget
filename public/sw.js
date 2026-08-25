@@ -12,7 +12,11 @@
  *  2. Show the offline page instead of the browser error when there is no
  *     connection at all.
  */
-const CACHE = "shell-v2"
+// Bump this on any deploy that changes the document <head> (icons, splash
+// links, manifest): cached pages keep serving the old head until a fast
+// network response happens to overwrite them, and iOS snapshots the head
+// at Add to Home Screen. v3 purged pages cached before the launch screen.
+const CACHE = "shell-v3"
 const OFFLINE_URL = "/offline.html"
 const NETWORK_TIMEOUT_MS = 2500
 
