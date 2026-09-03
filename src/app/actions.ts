@@ -7,7 +7,13 @@ import { z } from "zod"
 import { db, pot, salaries, spendings } from "@/lib/db"
 import { POT_ID, toPence } from "@/lib/queries"
 import { requireUser } from "@/lib/session"
-import { CATEGORIES, OWNER_IDS, SPENDING_KINDS } from "@/lib/spendings"
+import {
+  CARD_IDS,
+  CATEGORIES,
+  DEFAULT_CARD,
+  OWNER_IDS,
+  SPENDING_KINDS,
+} from "@/lib/spendings"
 
 const spendingInput = z.object({
   title: z.string().trim().min(1).max(120),
@@ -16,6 +22,9 @@ const spendingInput = z.object({
   category: z.enum(CATEGORIES),
   kind: z.enum(SPENDING_KINDS),
   owner: z.enum(OWNER_IDS),
+  // Only recurring costs are split across cards, and the legacy payload
+  // predates the field entirely, so an absent card is not an error.
+  card: z.enum(CARD_IDS).default(DEFAULT_CARD),
 })
 
 const salaryInput = z.object({
@@ -46,12 +55,18 @@ export async function setPot(input: unknown) {
 
 export async function addSpending(input: unknown) {
   await requireUser()
-  const { title, amount, day, category, kind, owner } =
+  const { title, amount, day, category, kind, owner, card } =
     spendingInput.parse(input)
 
-  await db
-    .insert(spendings)
-    .values({ title, amountPence: toPence(amount), day, category, kind, owner })
+  await db.insert(spendings).values({
+    title,
+    amountPence: toPence(amount),
+    day,
+    category,
+    kind,
+    owner,
+    card,
+  })
 
   revalidatePath("/")
   revalidatePath("/categories")
@@ -59,13 +74,13 @@ export async function addSpending(input: unknown) {
 
 export async function updateSpending(id: string, input: unknown) {
   await requireUser()
-  const { title, amount, day, category } = spendingInput
+  const { title, amount, day, category, card } = spendingInput
     .partial({ kind: true, owner: true })
     .parse(input)
 
   await db
     .update(spendings)
-    .set({ title, amountPence: toPence(amount), day, category })
+    .set({ title, amountPence: toPence(amount), day, category, card })
     .where(eq(spendings.id, z.uuid().parse(id)))
 
   revalidatePath("/")
@@ -115,13 +130,14 @@ export async function importLegacyData(input: unknown) {
   if (rows.length > 0) {
     statements.push(
       db.insert(spendings).values(
-        rows.map(({ title, amount, day, category, kind, owner }) => ({
+        rows.map(({ title, amount, day, category, kind, owner, card }) => ({
           title,
           amountPence: toPence(amount),
           day,
           category,
           kind,
           owner,
+          card,
         }))
       )
     )

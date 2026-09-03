@@ -18,6 +18,7 @@ function s(day: number, amount: number, title: string): Spending {
     category: "Other",
     kind: "recurring",
     owner: "jev",
+    card: "main",
   }
 }
 

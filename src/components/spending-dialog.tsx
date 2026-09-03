@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import { AmountInput } from "@/components/amount-input"
+import { CardBadge } from "@/components/card-badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -38,15 +39,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  CARDS,
   CATEGORY_GROUPS,
   currentDay,
+  DEFAULT_CARD,
   KIND_LABELS,
   DAYS,
   formatDay,
   type Category,
+  type CardId,
   type Spending,
   type SpendingKind,
 } from "@/lib/spendings"
+import { cn } from "@/lib/utils"
 
 type Values = Omit<Spending, "id" | "kind" | "owner">
 
@@ -69,6 +74,8 @@ type Props = {
   kind: SpendingKind
   /** Whose spending it is. */
   name: string
+  /** Whether to offer a card. Only Jev's recurring costs are split. */
+  showCard?: boolean
   onSubmit: (values: Values) => void
 }
 
@@ -78,6 +85,7 @@ export function SpendingDialog({
   spending,
   kind,
   name,
+  showCard = false,
   onDelete,
   onSubmit,
 }: Props) {
@@ -89,6 +97,7 @@ export function SpendingDialog({
           spending={spending}
           kind={kind}
           name={name}
+          showCard={showCard && kind === "recurring"}
           onDelete={
             spending
               ? () => {
@@ -112,6 +121,7 @@ function SpendingForm({
   spending,
   kind,
   name,
+  showCard,
   onDelete,
   onSubmit,
   onCancel,
@@ -119,6 +129,7 @@ function SpendingForm({
   spending: Spending | null
   kind: SpendingKind
   name: string
+  showCard: boolean
   onDelete?: () => void
   onSubmit: (values: Values) => void
   onCancel: () => void
@@ -131,6 +142,9 @@ function SpendingForm({
   const [category, setCategory] = useState<Category>(
     spending?.category ?? (kind === "food" ? "Food" : "Other")
   )
+  // Carried even when the picker is hidden, so editing a one-off does not
+  // quietly reset a card that a later change of kind would need.
+  const [card, setCard] = useState<CardId>(spending?.card ?? DEFAULT_CARD)
   const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent) {
@@ -148,6 +162,7 @@ function SpendingForm({
       amount: Math.round(parsedAmount * 100) / 100,
       day: Number(day),
       category,
+      card,
     })
   }
 
@@ -229,6 +244,35 @@ function SpendingForm({
             </SelectContent>
           </Select>
         </div>
+
+        {showCard ? (
+          <div className="grid gap-3">
+            <Label id="card-label">Card</Label>
+            <div
+              role="radiogroup"
+              aria-labelledby="card-label"
+              className="grid grid-cols-2 gap-2"
+            >
+              {CARDS.map(({ id, name: cardName }) => (
+                <Button
+                  key={id}
+                  type="button"
+                  role="radio"
+                  aria-checked={card === id}
+                  variant={card === id ? "secondary" : "outline"}
+                  className={cn(
+                    "justify-start gap-2",
+                    card === id && "ring-2 ring-ring/50"
+                  )}
+                  onClick={() => setCard(id)}
+                >
+                  <CardBadge card={id} />
+                  {cardName}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {error ? (
           <p className="text-sm text-destructive" role="alert">

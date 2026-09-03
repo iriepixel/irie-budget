@@ -1,10 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { Pencil, Plus } from "lucide-react"
 
 import { SpendMeter } from "@/components/spend-meter"
 import { SpendingsTable } from "@/components/spendings-table"
 import { Button } from "@/components/ui/button"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
 import {
   Card,
   CardAction,
@@ -15,8 +22,11 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
+  CARDS,
+  filterByCard,
   formatAmount,
   sumAmounts,
+  type CardTab,
   type Spending,
   type SpendingKind,
 } from "@/lib/spendings"
@@ -29,6 +39,8 @@ type Props = {
   spendings: Spending[]
   /** Whether this person keeps a separate food budget. */
   showFood?: boolean
+  /** Whether this person's recurring costs are split across two cards. */
+  showCards?: boolean
   onEditSalary: () => void
   onAdd: (kind: SpendingKind) => void
   onEdit: (spending: Spending) => void
@@ -40,20 +52,42 @@ export function PersonBudget({
   salary,
   spendings,
   showFood = false,
+  showCards = false,
   onEditSalary,
   onAdd,
   onEdit,
   onDelete,
 }: Props) {
+  const [cardTab, setCardTab] = useState<CardTab>("all")
+
   const recurring = spendings.filter((s) => s.kind === "recurring")
   const oneOff = spendings.filter((s) => s.kind === "oneOff")
   const food = spendings.filter((s) => s.kind === "food")
 
   const recurringTotal = sumAmounts(recurring)
+  const shownRecurring = showCards ? filterByCard(recurring, cardTab) : recurring
+  const shownRecurringTotal = showCards
+    ? sumAmounts(shownRecurring)
+    : recurringTotal
+  const tabbedCard = CARDS.find(({ id }) => id === cardTab)
   const oneOffTotal = sumAmounts(oneOff)
   const foodTotal = sumAmounts(food)
   const monthTotal = sumAmounts(spendings)
   const remaining = salary - monthTotal
+
+  const recurringTable = (
+    <SpendingsTable
+      spendings={shownRecurring}
+      emptyMessage={
+        tabbedCard
+          ? `Nothing on the ${tabbedCard.name} card`
+          : "No recurring spendings yet"
+      }
+      showCard={showCards}
+      onEdit={onEdit}
+      onDelete={onDelete}
+    />
+  )
 
   return (
     <section className="space-y-6">
@@ -106,8 +140,8 @@ export function PersonBudget({
         <CardHeader className="border-b py-5">
           <CardTitle>Recurring</CardTitle>
           <CardDescription>
-            Repeats every month · {recurring.length}{" "}
-            {recurring.length === 1 ? "entry" : "entries"}
+            Repeats every month · {shownRecurring.length}{" "}
+            {shownRecurring.length === 1 ? "entry" : "entries"}
           </CardDescription>
           <CardAction>
             <Button
@@ -120,18 +154,37 @@ export function PersonBudget({
             </Button>
           </CardAction>
         </CardHeader>
-        <CardContent className="px-0">
-          <SpendingsTable
-            spendings={recurring}
-            emptyMessage="No recurring spendings yet"
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </CardContent>
+        {showCards ? (
+          <Tabs
+            value={cardTab}
+            onValueChange={(value) => setCardTab(value as CardTab)}
+            className="gap-0"
+          >
+            <div className="border-b px-4 py-3">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all">All</TabsTrigger>
+                {CARDS.map(({ id, name: cardName }) => (
+                  <TabsTrigger key={id} value={id}>
+                    {cardName}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            {/* One panel, always the selected tab, so the table keeps its
+                sort across a switch instead of remounting per card. */}
+            <TabsContent value={cardTab} className="min-w-0">
+              {recurringTable}
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <CardContent className="px-0">{recurringTable}</CardContent>
+        )}
         <CardFooter className="justify-between border-t bg-muted/50 py-4">
-          <span className="text-sm font-medium">Total recurring</span>
+          <span className="text-sm font-medium">
+            {tabbedCard ? `Total ${tabbedCard.name} card` : "Total recurring"}
+          </span>
           <span className="text-lg font-semibold whitespace-nowrap tabular-nums">
-            {formatAmount(recurringTotal)}
+            {formatAmount(shownRecurringTotal)}
           </span>
         </CardFooter>
       </Card>

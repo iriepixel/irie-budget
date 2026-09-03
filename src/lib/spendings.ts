@@ -56,6 +56,28 @@ export const OWNER_IDS = ["jev", "olia"] as const
 export type Owner = (typeof OWNER_IDS)[number]
 
 /**
+ * Jev pays the recurring costs from one of two cards. Only recurring
+ * spendings are split this way; everything else sits on the default.
+ */
+export const CARD_IDS = ["main", "bill"] as const
+
+export type CardId = (typeof CARD_IDS)[number]
+
+/** The one place a card is given a human name and its one-letter mark. */
+export const CARDS = [
+  { id: "main", name: "Main", initial: "M" },
+  { id: "bill", name: "Bill", initial: "B" },
+] as const satisfies readonly { id: CardId; name: string; initial: string }[]
+
+/** What an unmarked spending counts as, in the UI and in the column default. */
+export const DEFAULT_CARD: CardId = "main"
+
+/** The tabs above the recurring table: either card, or everything. */
+export const CARD_TABS = ["all", ...CARD_IDS] as const
+
+export type CardTab = (typeof CARD_TABS)[number]
+
+/**
  * "recurring" repeats every month; "oneOff" applies to this month only;
  * "food" is the separate food budget, tracked in its own list.
  */
@@ -79,6 +101,8 @@ export type Spending = {
   category: Category
   kind: SpendingKind
   owner: Owner
+  /** Which card pays it. Only read for recurring spendings. */
+  card: CardId
 }
 
 /** Take-home pay per person. */
@@ -106,4 +130,9 @@ export function currentDay() {
 
 export function sumAmounts(spendings: Spending[]) {
   return spendings.reduce((sum, s) => sum + s.amount, 0)
+}
+
+/** The recurring rows a card tab shows; "all" filters nothing out. */
+export function filterByCard(spendings: Spending[], tab: CardTab) {
+  return tab === "all" ? spendings : spendings.filter((s) => s.card === tab)
 }

@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  CARD_IDS,
+  CARDS,
   CATEGORIES,
   CATEGORY_GROUPS,
   DAYS,
+  filterByCard,
   formatAmount,
   formatDay,
   OWNER_IDS,
@@ -22,6 +25,7 @@ function spending(partial: Partial<Spending>): Spending {
     category: "Other",
     kind: "recurring",
     owner: "jev",
+    card: "main",
     ...partial,
   }
 }
@@ -77,5 +81,33 @@ describe("constants", () => {
 
   it("knows the three kinds of spending", () => {
     expect([...SPENDING_KINDS]).toEqual(["recurring", "oneOff", "food"])
+  })
+})
+
+describe("filterByCard", () => {
+  const rows = [
+    spending({ id: "a", card: "main" }),
+    spending({ id: "b", card: "bill" }),
+    spending({ id: "c", card: "main" }),
+  ]
+
+  it("keeps everything on the all tab", () => {
+    expect(filterByCard(rows, "all")).toEqual(rows)
+  })
+
+  it("keeps only the rows paid by the chosen card", () => {
+    expect(filterByCard(rows, "bill").map((s) => s.id)).toEqual(["b"])
+    expect(filterByCard(rows, "main").map((s) => s.id)).toEqual(["a", "c"])
+  })
+
+  it("adds up to the whole list across both cards", () => {
+    const split = CARD_IDS.flatMap((id) => filterByCard(rows, id))
+    expect(split).toHaveLength(rows.length)
+  })
+})
+
+describe("CARDS", () => {
+  it("names every card id exactly once", () => {
+    expect(CARDS.map(({ id }) => id)).toEqual([...CARD_IDS])
   })
 })

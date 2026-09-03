@@ -25,6 +25,8 @@ export const spendings = pgTable("spendings", {
   kind: text("kind").notNull(),
   /** "jev" | "olia" */
   owner: text("owner").notNull(),
+  /** "main" | "bill" — which card pays it. Only read for recurring costs. */
+  card: text("card").notNull().default("main"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

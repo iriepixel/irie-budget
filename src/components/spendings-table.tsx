@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react"
 
+import { CardBadge } from "@/components/card-badge"
 import { CategoryBadge } from "@/components/category-badge"
 import {
   AlertDialog,
@@ -54,6 +55,8 @@ const SORT_LABELS: Record<SortColumn, string> = {
 type Props = {
   spendings: Spending[]
   emptyMessage: string
+  /** Whether the rows say which card pays them. Recurring costs only. */
+  showCard?: boolean
   onEdit: (spending: Spending) => void
   onDelete: (id: string) => void
 }
@@ -61,6 +64,7 @@ type Props = {
 export function SpendingsTable({
   spendings,
   emptyMessage,
+  showCard = false,
   onEdit,
   onDelete,
 }: Props) {
@@ -164,7 +168,10 @@ export function SpendingsTable({
                     {formatAmount(spending.amount)}
                   </span>
                 </span>
-                  <span className="flex items-center pl-8 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5 pl-8 text-xs text-muted-foreground">
+                    {showCard ? (
+                      <CardBadge card={spending.card} className="size-4.5" />
+                    ) : null}
                     <CategoryBadge
                       category={spending.category}
                       className="px-1.5 py-0 text-[11px]"
@@ -203,6 +210,11 @@ export function SpendingsTable({
                 onClick={() => toggle("title")}
               />
             </TableHead>
+            {showCard ? (
+              <TableHead className="w-[40px]">
+                <span className="sr-only">Card</span>
+              </TableHead>
+            ) : null}
             <TableHead>
               <SortButton
                 label="Category"
@@ -235,6 +247,11 @@ export function SpendingsTable({
                 {formatDay(spending.day)}
               </TableCell>
               <TableCell className="font-medium">{spending.title}</TableCell>
+              {showCard ? (
+                <TableCell>
+                  <CardBadge card={spending.card} />
+                </TableCell>
+              ) : null}
               <TableCell>
                 <CategoryBadge category={spending.category} />
               </TableCell>

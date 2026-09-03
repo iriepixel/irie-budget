@@ -142,6 +142,7 @@ export function BudgetView({ spendings, salaries }: Props) {
         salary={shownSalaries[id]}
         spendings={byOwner[id]}
         showFood={id === "olia"}
+        showCards={id === "jev"}
         onEditSalary={() => setSalaryOwner(id)}
         onAdd={(kind) => {
           setTarget({ owner: id, kind, spending: null })
@@ -210,6 +211,7 @@ export function BudgetView({ spendings, salaries }: Props) {
         spending={target.spending}
         kind={target.kind}
         name={OWNERS.find(({ id }) => id === target.owner)?.name ?? ""}
+        showCard={target.owner === "jev"}
         onDelete={handleDelete}
         onSubmit={handleSpendingSubmit}
       />

@@ -1,0 +1,1 @@
+ALTER TABLE "spendings" ADD COLUMN "card" text DEFAULT 'main' NOT NULL;

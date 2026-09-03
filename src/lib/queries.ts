@@ -6,6 +6,7 @@ import { db, pot, salaries, spendings } from "@/lib/db"
 import { toPence, toPounds } from "@/lib/money"
 import {
   OWNER_IDS,
+  type CardId,
   type Owner,
   type Salaries,
   type Spending,
@@ -39,6 +40,7 @@ export async function getBudget(): Promise<{
       category: row.category as Spending["category"],
       kind: row.kind as Spending["kind"],
       owner: row.owner as Owner,
+      card: row.card as CardId,
     })),
     salaries: amounts,
   }
@@ -72,5 +74,6 @@ export async function getSpendings(): Promise<Spending[]> {
     category: row.category as Spending["category"],
     kind: row.kind as Spending["kind"],
     owner: row.owner as Owner,
+    card: row.card as CardId,
   }))
 }

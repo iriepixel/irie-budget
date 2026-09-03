@@ -18,6 +18,7 @@ function s(partial: Partial<Spending>): Spending {
     category: "Other",
     kind: "recurring",
     owner: "jev",
+    card: "main",
     ...partial,
   }
 }
