@@ -1,8 +1,8 @@
 import { PotView } from "@/components/pot-view"
-import { getIncomes, getPot } from "@/lib/queries"
+import { getIncomes, getPots } from "@/lib/queries"
 
 export default async function PotPage() {
-  const [pot, incomes] = await Promise.all([getPot(), getIncomes()])
+  const [pots, incomes] = await Promise.all([getPots(), getIncomes()])
 
-  return <PotView pot={pot} incomes={incomes} />
+  return <PotView pots={pots} incomes={incomes} />
 }

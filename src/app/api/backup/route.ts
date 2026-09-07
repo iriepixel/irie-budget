@@ -2,7 +2,7 @@ import { headers } from "next/headers"
 
 import { isAllowed } from "@/lib/allowlist"
 import { auth } from "@/lib/auth"
-import { getBudget, getIncomes, getPot } from "@/lib/queries"
+import { getBudget, getIncomes, getPots } from "@/lib/queries"
 
 /**
  * Downloads the whole budget as JSON. The proxy does not gate /api, and a
@@ -16,9 +16,9 @@ export async function GET() {
     return new Response("Unauthorized", { status: 401 })
   }
 
-  const [{ spendings, salaries }, pot, incomes] = await Promise.all([
+  const [{ spendings, salaries }, pots, incomes] = await Promise.all([
     getBudget(),
-    getPot(),
+    getPots(),
     getIncomes(),
   ])
 
@@ -26,7 +26,7 @@ export async function GET() {
     exportedAt: new Date().toISOString(),
     exportedBy: session.user.email,
     salaries,
-    pot,
+    pots,
     spendings,
     incomes,
   }

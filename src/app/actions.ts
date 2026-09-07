@@ -5,7 +5,8 @@ import { eq } from "drizzle-orm"
 import { z } from "zod"
 
 import { db, incomes, pot, salaries, spendings } from "@/lib/db"
-import { POT_ID, toPence } from "@/lib/queries"
+import { POT_IDS } from "@/lib/pots"
+import { toPence } from "@/lib/queries"
 import { requireUser } from "@/lib/session"
 import {
   CARD_IDS,
@@ -42,19 +43,20 @@ const salaryInput = z.object({
 // Caps sized for the integer pence columns: int4 tops out around £21.4M,
 // so a larger zod bound would let a validated input crash in Postgres.
 const potInput = z.object({
+  id: z.enum(POT_IDS),
   amount: z.number().min(0).max(1_000_000),
   goal: z.number().min(0).max(1_000_000),
 })
 
 export async function setPot(input: unknown) {
   await requireUser()
-  const { amount, goal } = potInput.parse(input)
+  const { id, amount, goal } = potInput.parse(input)
   const amountPence = toPence(amount)
   const goalPence = toPence(goal)
 
   await db
     .insert(pot)
-    .values({ id: POT_ID, amountPence, goalPence })
+    .values({ id, amountPence, goalPence })
     .onConflictDoUpdate({ target: pot.id, set: { amountPence, goalPence } })
 
   revalidatePath("/pot")

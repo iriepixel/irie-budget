@@ -1,10 +1,11 @@
 import "server-only"
 
-import { eq } from "drizzle-orm"
+import { inArray } from "drizzle-orm"
 
 import { db, incomes, pot, salaries, spendings } from "@/lib/db"
 import { toPence, toPounds } from "@/lib/money"
 import type { Income } from "@/lib/income"
+import { POT_IDS, type PotId, type Pots } from "@/lib/pots"
 import {
   OWNER_IDS,
   type CardId,
@@ -47,18 +48,29 @@ export async function getBudget(): Promise<{
   }
 }
 
-/** The savings pot is a single running total, stored under one key. */
-export const POT_ID = "household"
+/**
+ * Every pot, whether or not it has a row yet: a pot nobody has put money
+ * in is zero, not missing.
+ */
+export async function getPots(): Promise<Pots> {
+  const rows = await db
+    .select()
+    .from(pot)
+    .where(inArray(pot.id, [...POT_IDS]))
 
-export type Pot = { saved: number; goal: number }
+  const empty = { saved: 0, goal: 0 }
+  const pots = Object.fromEntries(POT_IDS.map((id) => [id, empty])) as Pots
 
-export async function getPot(): Promise<Pot> {
-  const [row] = await db.select().from(pot).where(eq(pot.id, POT_ID))
-
-  return {
-    saved: row ? toPounds(row.amountPence) : 0,
-    goal: row ? toPounds(row.goalPence) : 0,
+  for (const row of rows) {
+    if ((POT_IDS as readonly string[]).includes(row.id)) {
+      pots[row.id as PotId] = {
+        saved: toPounds(row.amountPence),
+        goal: toPounds(row.goalPence),
+      }
+    }
   }
+
+  return pots
 }
 
 export { toPence, toPounds }
