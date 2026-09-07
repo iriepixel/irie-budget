@@ -1,16 +1,23 @@
 "use client"
 
 import { useOptimistic, useState, useTransition } from "react"
+import { PiggyBank, TrendingUp, Wallet } from "lucide-react"
 
 import { IncomeDialog } from "@/components/income-dialog"
 import { PlannedIncome } from "@/components/planned-income"
-import { PotCard, type PotExtra } from "@/components/pot-card"
+import { TotalCard, type TotalExtra } from "@/components/total-card"
 import { PotDialog } from "@/components/pot-dialog"
 import { addIncome, deleteIncome, setPot, updateIncome } from "@/app/actions"
 import { report } from "@/lib/report"
 import { sumAmounts } from "@/lib/spendings"
-import { POTS, type Pot, type PotId, type Pots } from "@/lib/pots"
+import { potMeta, type Pot, type PotId, type Pots } from "@/lib/pots"
 import type { Income } from "@/lib/income"
+
+/** Two identical piggy banks stacked read as one card rendered twice. */
+const POT_ICONS: Record<PotId, React.ComponentType<{ className?: string }>> = {
+  household: PiggyBank,
+  flex: Wallet,
+}
 
 /** A write that has been sent but not yet confirmed by the server. */
 type PendingWrite =
@@ -54,6 +61,8 @@ export function PotView({ pots, incomes }: Props) {
   )
   const [shownIncomes, addWrite] = useOptimistic(incomes, applyWrite)
 
+  const plannedTotal = sumAmounts(shownIncomes)
+
   function handlePotSubmit(id: PotId, next: Pot) {
     startTransition(async () => {
       setShownPot({ id, pot: next })
@@ -94,41 +103,67 @@ export function PotView({ pots, incomes }: Props) {
   }
 
   /**
-   * Only the household pot totals anything up. The first two lines each add
-   * one thing to it rather than stacking, so they answer two separate
-   * questions; the last adds up everything. A contribution of zero gets no
-   * line, and the total is only worth a line once there are two things to
-   * add: with one it would repeat the line above it.
+   * The lines under the savings figure. The first two each add one thing to
+   * it rather than stacking, so they answer two separate questions; the last
+   * adds up everything. A contribution of zero gets no line, and the total
+   * is only worth a line once there are two things to add: with one it would
+   * repeat the line above it.
    */
-  function extrasFor(id: PotId): PotExtra[] {
-    if (id !== "household") return []
-
+  function householdExtras(): TotalExtra[] {
     const { saved } = shownPots.household
     const flex = shownPots.flex.saved
-    const planned = sumAmounts(shownIncomes)
 
     return [
       ...(flex > 0 ? [{ label: "With Flex", total: saved + flex }] : []),
-      ...(planned > 0
-        ? [{ label: "With planned income", total: saved + planned }]
+      ...(plannedTotal > 0
+        ? [{ label: "With planned income", total: saved + plannedTotal }]
         : []),
-      ...(flex > 0 && planned > 0
-        ? [{ label: "Total", total: saved + flex + planned, emphasis: true }]
+      ...(flex > 0 && plannedTotal > 0
+        ? [
+            {
+              label: "Total",
+              total: saved + flex + plannedTotal,
+              emphasis: true,
+            },
+          ]
         : []),
     ]
   }
 
   return (
     <div className="space-y-6">
-      {POTS.map(({ id }) => (
-        <PotCard
-          key={id}
-          id={id}
-          pot={shownPots[id]}
-          extras={extrasFor(id)}
-          onEdit={() => setEditingPot(id)}
+      <TotalCard
+        title={potMeta("household").title}
+        label={potMeta("household").label}
+        icon={POT_ICONS.household}
+        amount={shownPots.household.saved}
+        goal={shownPots.household.goal}
+        extras={householdExtras()}
+        onEdit={() => setEditingPot("household")}
+      />
+
+      {/* The two smaller figures sit two-up once there is room, so the
+          page does not read as a column of identical cards. */}
+      <div className="grid gap-6 sm:grid-cols-2">
+        {/* No Update button: this figure is the table below added up, so
+            there is nothing here to type into. */}
+        <TotalCard
+          compact
+          title="Planned income"
+          label="Expected to arrive"
+          icon={TrendingUp}
+          amount={plannedTotal}
         />
-      ))}
+
+        <TotalCard
+          compact
+          title={potMeta("flex").title}
+          label={potMeta("flex").label}
+          icon={POT_ICONS.flex}
+          amount={shownPots.flex.saved}
+          onEdit={() => setEditingPot("flex")}
+        />
+      </div>
 
       <PlannedIncome
         incomes={shownIncomes}
