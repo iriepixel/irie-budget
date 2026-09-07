@@ -63,13 +63,13 @@ export function TotalCard({
           </CardAction>
         ) : null}
       </CardHeader>
-      {/* Heavier bottom padding: the header eats into the top gap, so
-          equal padding reads as bottom-light. A compact card carries one
-          line where the full one carries four, so it needs far less. */}
+      {/* Still bottom-heavy, since the header eats into the top gap and
+          equal padding reads as bottom-light — but the running totals now
+          fill the space that the old padding was holding open. */}
       <CardContent
         className={cn(
           "flex flex-col items-center",
-          compact ? "gap-4 pt-2 pb-8" : "gap-6 pt-8 pb-20"
+          compact ? "gap-4 pt-2 pb-8" : "gap-6 pt-8 pb-10"
         )}
       >
         <div
