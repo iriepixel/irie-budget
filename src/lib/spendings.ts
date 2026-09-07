@@ -128,8 +128,9 @@ export function currentDay() {
   return new Date().getDate()
 }
 
-export function sumAmounts(spendings: Spending[]) {
-  return spendings.reduce((sum, s) => sum + s.amount, 0)
+/** Totals anything with an amount, spendings and planned income alike. */
+export function sumAmounts(items: readonly { amount: number }[]) {
+  return items.reduce((sum, item) => sum + item.amount, 0)
 }
 
 /** The recurring rows a card tab shows; "all" filters nothing out. */

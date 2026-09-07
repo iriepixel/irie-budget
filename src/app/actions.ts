@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { eq } from "drizzle-orm"
 import { z } from "zod"
 
-import { db, pot, salaries, spendings } from "@/lib/db"
+import { db, incomes, pot, salaries, spendings } from "@/lib/db"
 import { POT_ID, toPence } from "@/lib/queries"
 import { requireUser } from "@/lib/session"
 import {
@@ -25,6 +25,13 @@ const spendingInput = z.object({
   // Only recurring costs are split across cards, and the legacy payload
   // predates the field entirely, so an absent card is not an error.
   card: z.enum(CARD_IDS).default(DEFAULT_CARD),
+})
+
+const incomeInput = z.object({
+  source: z.string().trim().min(1).max(120),
+  amount: z.number().positive().max(1_000_000),
+  // A real calendar date, so planned income can sit outside this month.
+  date: z.iso.date(),
 })
 
 const salaryInput = z.object({
@@ -94,6 +101,37 @@ export async function deleteSpending(id: string) {
 
   revalidatePath("/")
   revalidatePath("/categories")
+}
+
+export async function addIncome(input: unknown) {
+  await requireUser()
+  const { source, amount, date } = incomeInput.parse(input)
+
+  await db
+    .insert(incomes)
+    .values({ source, amountPence: toPence(amount), date })
+
+  revalidatePath("/pot")
+}
+
+export async function updateIncome(id: string, input: unknown) {
+  await requireUser()
+  const { source, amount, date } = incomeInput.parse(input)
+
+  await db
+    .update(incomes)
+    .set({ source, amountPence: toPence(amount), date })
+    .where(eq(incomes.id, z.uuid().parse(id)))
+
+  revalidatePath("/pot")
+}
+
+export async function deleteIncome(id: string) {
+  await requireUser()
+
+  await db.delete(incomes).where(eq(incomes.id, z.uuid().parse(id)))
+
+  revalidatePath("/pot")
 }
 
 export async function setSalary(input: unknown) {

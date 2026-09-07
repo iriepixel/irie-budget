@@ -2,6 +2,7 @@
 export * from "./auth-schema"
 
 import {
+  date,
   integer,
   pgTable,
   smallint,
@@ -32,6 +33,23 @@ export const spendings = pgTable("spendings", {
     .defaultNow(),
 })
 
+/**
+ * Planned income, kept apart from spendings so it can never leak into a
+ * spend total or a category chart. Dated with a real calendar date rather
+ * than the day-of-month a spending carries: money expected in six weeks
+ * belongs on the day it lands, not on a day number with no month attached.
+ */
+export const incomes = pgTable("incomes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  source: text("source").notNull(),
+  amountPence: integer("amount_pence").notNull(),
+  /** Read back as "YYYY-MM-DD"; no time, so no timezone can shift it. */
+  date: date("date").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+})
+
 export const salaries = pgTable("salaries", {
   owner: text("owner").primaryKey(),
   amountPence: integer("amount_pence").notNull(),
@@ -48,5 +66,6 @@ export const pot = pgTable("pot", {
 })
 
 export type SpendingRow = typeof spendings.$inferSelect
+export type IncomeRow = typeof incomes.$inferSelect
 export type SalaryRow = typeof salaries.$inferSelect
 export type PotRow = typeof pot.$inferSelect

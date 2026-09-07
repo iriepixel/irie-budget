@@ -2,8 +2,9 @@ import "server-only"
 
 import { eq } from "drizzle-orm"
 
-import { db, pot, salaries, spendings } from "@/lib/db"
+import { db, incomes, pot, salaries, spendings } from "@/lib/db"
 import { toPence, toPounds } from "@/lib/money"
+import type { Income } from "@/lib/income"
 import {
   OWNER_IDS,
   type CardId,
@@ -75,5 +76,17 @@ export async function getSpendings(): Promise<Spending[]> {
     kind: row.kind as Spending["kind"],
     owner: row.owner as Owner,
     card: row.card as CardId,
+  }))
+}
+
+/** Planned income, listed under the savings pot. */
+export async function getIncomes(): Promise<Income[]> {
+  const rows = await db.select().from(incomes)
+
+  return rows.map((row) => ({
+    id: row.id,
+    source: row.source,
+    amount: toPounds(row.amountPence),
+    date: row.date,
   }))
 }
