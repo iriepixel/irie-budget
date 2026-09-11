@@ -26,6 +26,7 @@ function spending(partial: Partial<Spending>): Spending {
     kind: "recurring",
     owner: "jev",
     card: "main",
+    color: "none",
     ...partial,
   }
 }

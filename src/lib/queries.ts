@@ -5,6 +5,7 @@ import { inArray } from "drizzle-orm"
 import { db, incomes, pot, salaries, spendings } from "@/lib/db"
 import { toPence, toPounds } from "@/lib/money"
 import type { Income } from "@/lib/income"
+import type { RowColor } from "@/lib/row-color"
 import { POT_IDS, type PotId, type Pots } from "@/lib/pots"
 import {
   OWNER_IDS,
@@ -43,6 +44,7 @@ export async function getBudget(): Promise<{
       kind: row.kind as Spending["kind"],
       owner: row.owner as Owner,
       card: row.card as CardId,
+      color: row.color as RowColor,
     })),
     salaries: amounts,
   }
@@ -88,6 +90,7 @@ export async function getSpendings(): Promise<Spending[]> {
     kind: row.kind as Spending["kind"],
     owner: row.owner as Owner,
     card: row.card as CardId,
+    color: row.color as RowColor,
   }))
 }
 
@@ -100,5 +103,6 @@ export async function getIncomes(): Promise<Income[]> {
     source: row.source,
     amount: toPounds(row.amountPence),
     date: row.date,
+    color: row.color as RowColor,
   }))
 }

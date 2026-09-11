@@ -39,6 +39,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { rowClass } from "@/lib/row-color"
 import { formatAmount, formatDay, type Spending } from "@/lib/spendings"
 import { cn } from "@/lib/utils"
 
@@ -85,6 +86,14 @@ export function SpendingsTable({
       return factor * (a.day - b.day) || b.amount - a.amount
     })
   }, [spendings, column, direction])
+
+  /** A hand-picked colour wins; otherwise the row takes the plain zebra. */
+  function tint(spending: Spending, index: number) {
+    return rowClass(
+      spending.color,
+      cn("hover:bg-muted", index % 2 === 1 && "bg-muted/50")
+    )
+  }
 
   function toggle(next: SortColumn) {
     if (next === column) {
@@ -147,7 +156,16 @@ export function SpendingsTable({
 
         <ul>
           {sorted.map((spending) => (
-            <li key={spending.id} className="border-b last:border-b-0">
+            <li
+              key={spending.id}
+              className={cn(
+                "border-b last:border-b-0",
+                // Only a picked colour here: the phone list has never
+                // striped, and striping it now would be a change nobody
+                // asked for.
+                rowClass(spending.color)
+              )}
+            >
               <button
                 type="button"
                 onClick={() => onEdit(spending)}
@@ -238,10 +256,10 @@ export function SpendingsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sorted.map((spending) => (
+          {sorted.map((spending, index) => (
             <TableRow
               key={spending.id}
-              className="group even:bg-muted/50 hover:bg-muted"
+              className={cn("group", tint(spending, index))}
             >
               <TableCell className="pl-4 text-muted-foreground tabular-nums">
                 {formatDay(spending.day)}

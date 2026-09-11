@@ -1,3 +1,5 @@
+import type { RowColor } from "@/lib/row-color"
+
 /**
  * Planned income: what is expected to arrive, listed under the savings pot.
  * Deliberately not a kind of spending — it must never reach a spend total.
@@ -9,6 +11,8 @@ export type Income = {
   /** ISO "YYYY-MM-DD". Held as text so sorting is byte order and no
       timezone can move a date across midnight. */
   date: string
+  /** A tint picked by hand; "none" leaves the row to the month banding. */
+  color: RowColor
 }
 
 const dateFormat = new Intl.DateTimeFormat("en-GB", {

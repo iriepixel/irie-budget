@@ -1,0 +1,1 @@
+ALTER TABLE "incomes" ADD COLUMN "color" text DEFAULT 'none' NOT NULL;

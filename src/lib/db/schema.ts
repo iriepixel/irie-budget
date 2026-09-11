@@ -28,6 +28,8 @@ export const spendings = pgTable("spendings", {
   owner: text("owner").notNull(),
   /** "main" | "bill" — which card pays it. Only read for recurring costs. */
   card: text("card").notNull().default("main"),
+  /** "none" | "red" | "yellow" | "green" | "blue" — a hand-picked row tint. */
+  color: text("color").notNull().default("none"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -45,6 +47,8 @@ export const incomes = pgTable("incomes", {
   amountPence: integer("amount_pence").notNull(),
   /** Read back as "YYYY-MM-DD"; no time, so no timezone can shift it. */
   date: date("date").notNull(),
+  /** "none" | "red" | "yellow" | "green" | "blue" — a hand-picked row tint. */
+  color: text("color").notNull().default("none"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

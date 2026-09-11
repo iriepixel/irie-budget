@@ -26,7 +26,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { RowColorPicker } from "@/components/row-color-picker"
 import { todayISO, type Income } from "@/lib/income"
+import type { RowColor } from "@/lib/row-color"
 
 type Values = Omit<Income, "id">
 
@@ -87,6 +89,7 @@ function IncomeForm({
   const [source, setSource] = useState(income?.source ?? "")
   const [amount, setAmount] = useState(income ? String(income.amount) : "")
   const [date, setDate] = useState(income?.date ?? todayISO())
+  const [color, setColor] = useState<RowColor>(income?.color ?? "none")
   const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent) {
@@ -105,6 +108,7 @@ function IncomeForm({
       source: trimmed,
       amount: Math.round(parsedAmount * 100) / 100,
       date,
+      color,
     })
   }
 
@@ -151,6 +155,12 @@ function IncomeForm({
             />
           </div>
         </div>
+
+        <RowColorPicker
+          value={color}
+          onChange={setColor}
+          noneHint="No colour — the row keeps the month shading"
+        />
 
         {error ? (
           <p className="text-sm text-destructive" role="alert">

@@ -17,6 +17,7 @@ function income(partial: Partial<Income>): Income {
     source: "Salary",
     amount: 100,
     date: "2026-09-07",
+    color: "none",
     ...partial,
   }
 }

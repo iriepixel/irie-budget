@@ -36,6 +36,20 @@
       "when": 1788777744323,
       "tag": "0004_mushy_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789124079544,
+      "tag": "0005_worthless_quicksilver",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789126371189,
+      "tag": "0006_flaky_karnak",
+      "breakpoints": true
     }
   ]
 }

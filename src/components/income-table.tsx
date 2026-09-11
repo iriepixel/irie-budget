@@ -46,6 +46,7 @@ import {
   type Income,
   type IncomeColumn,
 } from "@/lib/income"
+import { rowClass } from "@/lib/row-color"
 import { formatAmount } from "@/lib/spendings"
 import { cn } from "@/lib/utils"
 
@@ -74,13 +75,15 @@ export function IncomeTable({ incomes, onEdit, onDelete }: Props) {
   const bands = useMemo(() => monthBands(sorted), [sorted])
 
   /**
-   * The row tint. In date order it bands by month, so the eye can see where
-   * one month ends; under any other sort it falls back to plain zebra.
+   * The row tint. A colour picked by hand wins outright, since the point of
+   * picking one is that the row stands out. Left to itself the row bands by
+   * month in date order, so the eye can see where one month ends, and falls
+   * back to plain zebra under any other sort.
    */
-  function tint(index: number) {
+  function tint(income: Income, index: number) {
     const shaded = column === "date" ? bands[index] === 1 : index % 2 === 1
 
-    return shaded ? "bg-muted/50" : undefined
+    return rowClass(income.color, cn("hover:bg-muted", shaded && "bg-muted/50"))
   }
 
   function toggle(next: IncomeColumn) {
@@ -150,7 +153,7 @@ export function IncomeTable({ incomes, onEdit, onDelete }: Props) {
           {sorted.map((income, index) => (
             <li
               key={income.id}
-              className={cn("border-b last:border-b-0", tint(index))}
+              className={cn("border-b last:border-b-0", tint(income, index))}
             >
               <button
                 type="button"
@@ -221,7 +224,7 @@ export function IncomeTable({ incomes, onEdit, onDelete }: Props) {
             {sorted.map((income, index) => (
               <TableRow
                 key={income.id}
-                className={cn("group hover:bg-muted", tint(index))}
+                className={cn("group", tint(income, index))}
               >
                 <TableCell className="pl-4 whitespace-nowrap text-muted-foreground tabular-nums">
                   {formatIncomeDate(income.date)}

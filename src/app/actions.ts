@@ -6,6 +6,7 @@ import { z } from "zod"
 
 import { db, incomes, pot, salaries, spendings } from "@/lib/db"
 import { POT_IDS } from "@/lib/pots"
+import { ROW_COLORS } from "@/lib/row-color"
 import { toPence } from "@/lib/queries"
 import { requireUser } from "@/lib/session"
 import {
@@ -26,6 +27,8 @@ const spendingInput = z.object({
   // Only recurring costs are split across cards, and the legacy payload
   // predates the field entirely, so an absent card is not an error.
   card: z.enum(CARD_IDS).default(DEFAULT_CARD),
+  // Rows written before the colours existed have none.
+  color: z.enum(ROW_COLORS).default("none"),
 })
 
 const incomeInput = z.object({
@@ -33,6 +36,8 @@ const incomeInput = z.object({
   amount: z.number().positive().max(1_000_000),
   // A real calendar date, so planned income can sit outside this month.
   date: z.iso.date(),
+  // Rows written before the colours existed have none.
+  color: z.enum(ROW_COLORS).default("none"),
 })
 
 const salaryInput = z.object({
@@ -64,7 +69,7 @@ export async function setPot(input: unknown) {
 
 export async function addSpending(input: unknown) {
   await requireUser()
-  const { title, amount, day, category, kind, owner, card } =
+  const { title, amount, day, category, kind, owner, card, color } =
     spendingInput.parse(input)
 
   await db.insert(spendings).values({
@@ -75,6 +80,7 @@ export async function addSpending(input: unknown) {
     kind,
     owner,
     card,
+    color,
   })
 
   revalidatePath("/")
@@ -83,13 +89,13 @@ export async function addSpending(input: unknown) {
 
 export async function updateSpending(id: string, input: unknown) {
   await requireUser()
-  const { title, amount, day, category, card } = spendingInput
+  const { title, amount, day, category, card, color } = spendingInput
     .partial({ kind: true, owner: true })
     .parse(input)
 
   await db
     .update(spendings)
-    .set({ title, amountPence: toPence(amount), day, category, card })
+    .set({ title, amountPence: toPence(amount), day, category, card, color })
     .where(eq(spendings.id, z.uuid().parse(id)))
 
   revalidatePath("/")
@@ -107,22 +113,22 @@ export async function deleteSpending(id: string) {
 
 export async function addIncome(input: unknown) {
   await requireUser()
-  const { source, amount, date } = incomeInput.parse(input)
+  const { source, amount, date, color } = incomeInput.parse(input)
 
   await db
     .insert(incomes)
-    .values({ source, amountPence: toPence(amount), date })
+    .values({ source, amountPence: toPence(amount), date, color })
 
   revalidatePath("/pot")
 }
 
 export async function updateIncome(id: string, input: unknown) {
   await requireUser()
-  const { source, amount, date } = incomeInput.parse(input)
+  const { source, amount, date, color } = incomeInput.parse(input)
 
   await db
     .update(incomes)
-    .set({ source, amountPence: toPence(amount), date })
+    .set({ source, amountPence: toPence(amount), date, color })
     .where(eq(incomes.id, z.uuid().parse(id)))
 
   revalidatePath("/pot")
@@ -170,15 +176,18 @@ export async function importLegacyData(input: unknown) {
   if (rows.length > 0) {
     statements.push(
       db.insert(spendings).values(
-        rows.map(({ title, amount, day, category, kind, owner, card }) => ({
-          title,
-          amountPence: toPence(amount),
-          day,
-          category,
-          kind,
-          owner,
-          card,
-        }))
+        rows.map(
+          ({ title, amount, day, category, kind, owner, card, color }) => ({
+            title,
+            amountPence: toPence(amount),
+            day,
+            category,
+            kind,
+            owner,
+            card,
+            color,
+          })
+        )
       )
     )
   }

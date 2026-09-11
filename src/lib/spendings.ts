@@ -1,3 +1,5 @@
+import type { RowColor } from "@/lib/row-color"
+
 export const CATEGORIES = [
   "Food",
   "Mortgage",
@@ -103,6 +105,8 @@ export type Spending = {
   owner: Owner
   /** Which card pays it. Only read for recurring spendings. */
   card: CardId
+  /** A tint picked by hand; "none" leaves the row to the table's zebra. */
+  color: RowColor
 }
 
 /** Take-home pay per person. */

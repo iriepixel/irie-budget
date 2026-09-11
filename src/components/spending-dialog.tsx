@@ -17,6 +17,7 @@ import {
 
 import { AmountInput } from "@/components/amount-input"
 import { CardBadge } from "@/components/card-badge"
+import { RowColorPicker } from "@/components/row-color-picker"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -51,6 +52,7 @@ import {
   type Spending,
   type SpendingKind,
 } from "@/lib/spendings"
+import type { RowColor } from "@/lib/row-color"
 import { cn } from "@/lib/utils"
 
 type Values = Omit<Spending, "id" | "kind" | "owner">
@@ -145,6 +147,7 @@ function SpendingForm({
   // Carried even when the picker is hidden, so editing a one-off does not
   // quietly reset a card that a later change of kind would need.
   const [card, setCard] = useState<CardId>(spending?.card ?? DEFAULT_CARD)
+  const [color, setColor] = useState<RowColor>(spending?.color ?? "none")
   const [error, setError] = useState<string | null>(null)
 
   function handleSubmit(event: React.FormEvent) {
@@ -163,6 +166,7 @@ function SpendingForm({
       day: Number(day),
       category,
       card,
+      color,
     })
   }
 
@@ -273,6 +277,12 @@ function SpendingForm({
             </div>
           </div>
         ) : null}
+
+        <RowColorPicker
+          value={color}
+          onChange={setColor}
+          noneHint="No colour — the row keeps the table's own shading"
+        />
 
         {error ? (
           <p className="text-sm text-destructive" role="alert">

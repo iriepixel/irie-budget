@@ -19,6 +19,7 @@ function s(day: number, amount: number, title: string): Spending {
     kind: "recurring",
     owner: "jev",
     card: "main",
+    color: "none",
   }
 }
 
