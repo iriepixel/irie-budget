@@ -2,7 +2,7 @@
  * Each pot is a single running total, so the table holds one row per pot
  * keyed by name rather than a row per deposit.
  */
-export const POT_IDS = ["household", "flex"] as const
+export const POT_IDS = ["household", "flex", "sergej"] as const
 
 export type PotId = (typeof POT_IDS)[number]
 
@@ -22,6 +22,7 @@ export const POTS = [
     hasGoal: true,
   },
   { id: "flex", title: "Flex", label: "Saved in Flex", hasGoal: false },
+  { id: "sergej", title: "Sergej", label: "Saved for Sergej", hasGoal: false },
 ] as const satisfies readonly {
   id: PotId
   title: string

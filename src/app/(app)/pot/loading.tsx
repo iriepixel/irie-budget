@@ -6,7 +6,8 @@ export default function Loading() {
       {/* Tallest first: the savings pot carries the goal and the running
           totals that the two compact cards below it do not. */}
       <Skeleton className="h-64 w-full rounded-xl" />
-      <div className="grid gap-6 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Skeleton className="h-48 w-full rounded-xl" />
         <Skeleton className="h-48 w-full rounded-xl" />
         <Skeleton className="h-48 w-full rounded-xl" />
       </div>

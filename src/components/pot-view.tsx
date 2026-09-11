@@ -1,7 +1,7 @@
 "use client"
 
 import { useOptimistic, useState, useTransition } from "react"
-import { PiggyBank, TrendingUp, Wallet } from "lucide-react"
+import { Coins, PiggyBank, TrendingUp, Wallet } from "lucide-react"
 
 import { IncomeDialog } from "@/components/income-dialog"
 import { PlannedIncome } from "@/components/planned-income"
@@ -17,6 +17,7 @@ import type { Income } from "@/lib/income"
 const POT_ICONS: Record<PotId, React.ComponentType<{ className?: string }>> = {
   household: PiggyBank,
   flex: Wallet,
+  sergej: Coins,
 }
 
 /** A write that has been sent but not yet confirmed by the server. */
@@ -103,31 +104,36 @@ export function PotView({ pots, incomes }: Props) {
   }
 
   /**
-   * The lines under the savings figure. The first two each add one thing to
-   * it rather than stacking, so they answer two separate questions; the last
-   * adds up everything. A contribution of zero gets no line, and the total
-   * is only worth a line once there are two things to add: with one it would
-   * repeat the line above it.
+   * The lines under the savings figure: the money actually held, what is
+   * still to come, and last the only emphasised line, the two added up.
    */
   function householdExtras(): TotalExtra[] {
     const { saved } = shownPots.household
     const flex = shownPots.flex.saved
+    const sergej = shownPots.sergej.saved
 
-    return [
-      ...(flex > 0 ? [{ label: "With Flex", total: saved + flex }] : []),
-      ...(plannedTotal > 0
-        ? [{ label: "With planned income", total: saved + plannedTotal }]
-        : []),
-      ...(flex > 0 && plannedTotal > 0
-        ? [
-            {
-              label: "Total",
-              total: saved + flex + plannedTotal,
-              emphasis: true,
-            },
-          ]
-        : []),
-    ]
+    const extras: TotalExtra[] = []
+
+    /**
+     * A line only earns its place when it says something the headline and
+     * the lines above it do not: an empty pot would have it repeating the
+     * savings figure, or a line already on the card.
+     */
+    function add(label: string, total: number, emphasis = false) {
+      if (total === saved) return
+      if (extras.some((extra) => extra.total === total)) return
+
+      extras.push({ label, total, emphasis })
+    }
+
+    add("Saved + Flex + Sergej", saved + flex + sergej)
+    // Pushed directly, not through add(): this is the addend itself rather
+    // than a running total, so the total below can be read off the two
+    // lines above it instead of taken on trust.
+    if (plannedTotal > 0) extras.push({ label: "Planned", total: plannedTotal })
+    add("Total", saved + flex + sergej + plannedTotal, true)
+
+    return extras
   }
 
   return (
@@ -142,9 +148,11 @@ export function PotView({ pots, incomes }: Props) {
         onEdit={() => setEditingPot("household")}
       />
 
-      {/* The two smaller figures sit two-up once there is room, so the
-          page does not read as a column of identical cards. */}
-      <div className="grid gap-6 sm:grid-cols-2">
+      {/* The smaller figures sit side by side once there is room, so the
+          page does not read as a column of identical cards. Three abreast
+          only below a wide enough viewport to keep a 4xl amount inside
+          its column. */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {/* No Update button: this figure is the table below added up, so
             there is nothing here to type into. */}
         <TotalCard
@@ -162,6 +170,15 @@ export function PotView({ pots, incomes }: Props) {
           icon={POT_ICONS.flex}
           amount={shownPots.flex.saved}
           onEdit={() => setEditingPot("flex")}
+        />
+
+        <TotalCard
+          compact
+          title={potMeta("sergej").title}
+          label={potMeta("sergej").label}
+          icon={POT_ICONS.sergej}
+          amount={shownPots.sergej.saved}
+          onEdit={() => setEditingPot("sergej")}
         />
       </div>
 
